@@ -7,6 +7,15 @@
 
 import UIKit
 
+class MemoDetailViewController : UIViewController{
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .green
+    }
+    
+}
+
 //protocol EditMemoDelegate : AnyObject{
 //    func didEditPerformd(_ content : String)
 //}

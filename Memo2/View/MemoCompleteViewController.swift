@@ -7,6 +7,15 @@
 
 import UIKit
 
+class MemoCompleteViewController : UIViewController{
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .yellow
+    }
+    
+}
+
 //extension MemoCompleteViewController : UITableViewDelegate, UITableViewDataSource{
 //    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 //        if let cell = tableView.dequeueReusableCell(withIdentifier: "customCell") as? CustomCell {
