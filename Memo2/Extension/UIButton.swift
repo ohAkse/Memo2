@@ -23,7 +23,6 @@ extension UIButton {
         let buttonFont = UIFont(name: "Helvetica-Bold", size: 17.0)
         self.titleLabel?.font = buttonFont
         self.setTitleColor(.white, for: .normal)
-        
     }
     
 }

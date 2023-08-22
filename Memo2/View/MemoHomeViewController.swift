@@ -77,14 +77,14 @@ class MemoHomeViewController : UIViewController{
         }, completion: nil)
         //push로 할지 transition(애니메이션)으로 할지는 조금더 생각..
         
+        
+        
     }
-    
     @objc func moveToCompletsButtonTapped(){
         let memoListVC = MemoCompleteViewController()
         let navigationController = UINavigationController(rootViewController: memoListVC)
         present(navigationController, animated: true, completion: nil)
     }
-    
 }
 
 
