@@ -5,7 +5,7 @@
 //  Created by 박유경 on 2023/08/22.
 //
 
-import Foundation
+import UIKit
 extension UIViewController {
     func showAlert(title: String?, message: String?, buttonTitle: String = "OK", completion: (() -> Void)? = nil) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)

@@ -5,7 +5,7 @@
 //  Created by 박유경 on 2023/08/22.
 //
 
-import Foundation
+import UIKit
 extension Date{
     func GetCurrentTime() -> String{
         let formatter = DateFormatter()
