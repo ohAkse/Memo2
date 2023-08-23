@@ -7,7 +7,6 @@
 
 import UIKit
 
-//카테고리 운동, 공부, 모임
 class MemoCategoryViewController : UIViewController
 {
     

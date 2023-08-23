@@ -6,35 +6,6 @@
 //
 
 import UIKit
-enum UISheetPaperType {
-    case create
-    case update
-    case category
-    case none
-    var typeValue: String {
-        switch self {
-        case .none: return ""
-        case .create: return "할일 작성"
-        case .update: return "할일 수정"
-        case .category: return "카테 고리"
-        }
-    }
-}
-enum CategoryType {
-    case workout
-    case study
-    case meeting
-    case none
-    var typeValue: String {
-        switch self {
-        case .workout: return "운동"
-        case .study: return "공부"
-        case .meeting: return "모임"
-        case .none: return ""
-        }
-    }
-}
-
 class MemoWriteViewController : UIViewController, UITextViewDelegate
 {
     lazy var titleLabel : UILabel = {
@@ -64,7 +35,6 @@ class MemoWriteViewController : UIViewController, UITextViewDelegate
     }()
     
     var category : String = ""
-    var contentTextFieldAction : (()-> Void)?
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(true)
@@ -101,7 +71,7 @@ class MemoWriteViewController : UIViewController, UITextViewDelegate
         confirmButton.snp.makeConstraints { make in
             make.top.equalTo(textContent.snp.bottom).offset(10)
             make.trailing.equalTo(view.safeAreaLayoutGuide.snp.trailing).offset(-20)
-            make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).offset(-10)
+            make.height.equalTo(50)
             make.width.equalTo(100)
         }
     }
@@ -109,11 +79,10 @@ class MemoWriteViewController : UIViewController, UITextViewDelegate
         if textContent.text != ""{
             if titleLabel.text == UISheetPaperType.update.typeValue{
                 self.dismiss(animated: true)
-                self.contentTextFieldAction?()
             }else{
                 self.presentingViewController?.presentingViewController?.dismiss(animated: true, completion: nil)
-                self.contentTextFieldAction?()
             }
+            NotificationCenter.default.post(name: .textChangeStatus, object: TextChangeCommitStatus.Success.typeValue)
         }else{
             self.showAlert(title: "에러", message: "내용을 추가해주세요")
         }

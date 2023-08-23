@@ -11,8 +11,9 @@ class TodoListCell : UITableViewCell, UITextViewDelegate{
     lazy var textView: UITextView = {
         let textView = UITextView()
         textView.isScrollEnabled = false
-        textView.font = UIFont.systemFont(ofSize: 30)
+        textView.font = UIFont.systemFont(ofSize: cellFontSize)
         textView.tintColor = .clear
+        
         return textView
     }()
     

@@ -8,7 +8,7 @@
 import UIKit
 let footerHeight = 40.0
 let headerHeight = 40.0
-let cellFontSize = 30.0
+let cellFontSize = 24.0
 extension MemoListViewController: UITableViewDelegate, UITableViewDataSource {
     
     ///MARK : 섹션 헤더
@@ -19,10 +19,8 @@ extension MemoListViewController: UITableViewDelegate, UITableViewDataSource {
     // 섹션 헤더의 내용을 설정
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let headerView = UIView()
-        
+        headerView.backgroundColor = .lightGray
         let category = categories[section]
-        
-        headerView.backgroundColor = .gray // 헤더의 배경색을 설정합니다.
         let headerLabel = UILabel()
         headerLabel.setupCustomLabelFont(text: category.name, isBold: false, textSize : 20)
         headerLabel.frame = CGRect(x: 20, y: ( ((headerHeight)/2) - headerLabel.frame.size.height) / 2,width: tableView.bounds.width, height: headerLabel.intrinsicContentSize.height)
@@ -38,8 +36,6 @@ extension MemoListViewController: UITableViewDelegate, UITableViewDataSource {
     // 섹션 푸터의 내용을 설정
     func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
         let footerView = UIView()
-        footerView.backgroundColor = .white
-        
         let footerLabelLabel = UILabel()
         footerLabelLabel.setupCustomLabelFont(text: "완료되지 않은 항목은 총 \(section)건 입니다.", isBold: false, textSize : 20)
         footerLabelLabel.frame = CGRect(x: 20, y: ( ((footerHeight)/2) - footerLabelLabel.frame.size.height) / 2, width: tableView.bounds.width, height: footerLabelLabel.intrinsicContentSize.height)
@@ -61,10 +57,11 @@ extension MemoListViewController: UITableViewDelegate, UITableViewDataSource {
             
             cell.textView.text = sectionItem.memoText
             cell.switchButton.isOn = sectionItem.isSwitchOn
+            
             var attributes: [NSAttributedString.Key: Any] = [:]
-            
+
             attributes[.font] = UIFont.systemFont(ofSize: cellFontSize)
-            
+
             if cell.switchButton.isOn {
                 attributes[.strikethroughStyle] = NSUnderlineStyle.single.rawValue
             } else {
@@ -80,30 +77,31 @@ extension MemoListViewController: UITableViewDelegate, UITableViewDataSource {
             }
             cell.contentTextFieldAction = { [weak self] in
                 guard let self = self else { return }
-                
-                for category in categories {
-                    for sectionItem in category.items {
-                        if sectionItem.memoText == cell.textView.text {
-                            let foundCategory = category
-                            let MemoWriteVC = MemoWriteViewController()
-                            
-                            if let presentationController = MemoWriteVC.presentationController as? UISheetPresentationController {
-                                presentationController.detents = [
-                                    .medium(),
-                                ]
-                                presentationController.prefersGrabberVisible = true
+                // 셀에서 모달이 이미 열려 있는지 확인
+                if self.presentedViewController == nil {
+                    for category in categories {
+                        for sectionItem in category.items {
+                            if sectionItem.memoText == cell.textView.text {
+                                let foundCategory = category
+                                let MemoWriteVC = MemoWriteViewController()
+
+                                if let presentationController = MemoWriteVC.presentationController as? UISheetPresentationController {
+                                    presentationController.detents = [
+                                        .medium(),
+                                    ]
+                                    presentationController.prefersGrabberVisible = true
+                                }
+                                MemoWriteVC.titleLabel.text = UISheetPaperType.update.typeValue
+                                MemoWriteVC.category = foundCategory.name
+                                MemoWriteVC.textContent.text = sectionItem.memoText
+                                self.present(MemoWriteVC, animated: true)
+
+                                break
                             }
-                            MemoWriteVC.titleLabel.text = UISheetPaperType.update.typeValue
-                            MemoWriteVC.category = foundCategory.name
-                            MemoWriteVC.textContent.text = sectionItem.memoText
-                            self.present(MemoWriteVC, animated: true)
-                            
-                            break
                         }
                     }
                 }
             }
-            
             return cell
         }else{
             return UITableViewCell()
@@ -116,15 +114,12 @@ extension MemoListViewController: UITableViewDelegate, UITableViewDataSource {
     
     func configureTextView(for textView: UITextView, with text: String, isSwitchOn: Bool) {
         var attributes: [NSAttributedString.Key: Any] = [:]
-        
         attributes[.font] = UIFont.systemFont(ofSize: cellFontSize)
-        
         if isSwitchOn {
             attributes[.strikethroughStyle] = NSUnderlineStyle.single.rawValue
         } else {
             attributes.removeValue(forKey: .strikethroughStyle)
         }
-        
         textView.attributedText = NSAttributedString(string: text, attributes: attributes)
     }
 }
@@ -135,6 +130,15 @@ var categories: [Category] = [
         SectionItem(memoText: "Text 2 - Section 1", isSwitchOn: false),
         SectionItem(memoText: "Text 3 - Section 1", isSwitchOn: true),
         SectionItem(memoText: "Text 4 - Section 1", isSwitchOn: true),
+        SectionItem(memoText: "Text 5 - Section 1", isSwitchOn: false),
+        SectionItem(memoText: "Text 6 - Section 1", isSwitchOn: true),
+        SectionItem(memoText: "Text 7 - Section 1", isSwitchOn: false),
+        SectionItem(memoText: "Text 5 - Section 1", isSwitchOn: true),
+        SectionItem(memoText: "Text 6 - Section 1", isSwitchOn: false),
+        SectionItem(memoText: "Text 7 - Section 1", isSwitchOn: true),
+        SectionItem(memoText: "Text 5 - Section 1", isSwitchOn: true),
+        SectionItem(memoText: "Text 6 - Section 1", isSwitchOn: false),
+        SectionItem(memoText: "Text 7 - Section 1", isSwitchOn: true),
         SectionItem(memoText: "Text 5 - Section 1", isSwitchOn: true),
         SectionItem(memoText: "Text 6 - Section 1", isSwitchOn: true),
         SectionItem(memoText: "Text 7 - Section 1", isSwitchOn: true)
@@ -155,8 +159,7 @@ var categories: [Category] = [
     ])
 ]
 
-class MemoListViewController : UIViewController/*, TextChangedStatus*/{
-
+class MemoListViewController : UIViewController{
     lazy var tableView : UITableView = {
         let tableView = UITableView(frame: .zero, style: .grouped)
         tableView.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
@@ -166,16 +169,13 @@ class MemoListViewController : UIViewController/*, TextChangedStatus*/{
         tableView.dataSource = self
         return tableView
     }()
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupNavigationBar()
         setupSubviews()
         setupLayout()
         setupTableFHView()
-        
     }
-    
     func setupTableFHView(){
         let tableViewHeader = UIView(frame: CGRect(x: 0, y: 0 , width: view.bounds.width, height: headerHeight))
         tableViewHeader.backgroundColor = .white
@@ -215,7 +215,6 @@ class MemoListViewController : UIViewController/*, TextChangedStatus*/{
             presentationController.prefersGrabberVisible = true
         }
         self.present(MemoCategoryVC, animated: true)
-        
     }
     
     func setupSubviews(){
