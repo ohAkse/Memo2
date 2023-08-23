@@ -8,7 +8,6 @@
 import UIKit
 
 class TodoListCell : UITableViewCell{
-    
     lazy var textView: UITextView = {
         let textView = UITextView()
         textView.isScrollEnabled = false
@@ -23,15 +22,27 @@ class TodoListCell : UITableViewCell{
         switchButton.tintColor = UIColor.red
         return switchButton
     }()
+    var switchButtonAction: (() -> Void)?
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupSubviews()
         setupLayout()
+        switchButton.addTarget(self, action: #selector(switchButtonTapped), for: .touchUpInside)
+        
     }
+    @objc func switchButtonTapped(){
+        self.switchButtonAction?()
+    }
+    
     required init?(coder aDecoder: NSCoder) {
         fatalError("음뭬에에에")
     }
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        textView.attributedText = nil
+    }
+    
     func setupSubviews(){
         contentView.addSubview(textView)
         contentView.addSubview(switchButton)
