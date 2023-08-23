@@ -19,9 +19,9 @@ extension MemoListViewController: UITableViewDelegate, UITableViewDataSource {
     // 섹션 헤더의 내용을 설정
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let headerView = UIView()
-
+        
         let category = categories[section]
-
+        
         headerView.backgroundColor = .gray // 헤더의 배경색을 설정합니다.
         let headerLabel = UILabel()
         headerLabel.setupCustomLabelFont(text: category.name, isBold: false, textSize : 20)
@@ -58,13 +58,13 @@ extension MemoListViewController: UITableViewDelegate, UITableViewDataSource {
         if let cell = tableView.dequeueReusableCell(withIdentifier: "TodoListCell") as? TodoListCell {
             let category = categories[indexPath.section]
             let sectionItem = category.items[indexPath.row]
-                    
+            
             cell.textView.text = sectionItem.memoText
             cell.switchButton.isOn = sectionItem.isSwitchOn
             var attributes: [NSAttributedString.Key: Any] = [:]
-
+            
             attributes[.font] = UIFont.systemFont(ofSize: cellFontSize)
-
+            
             if cell.switchButton.isOn {
                 attributes[.strikethroughStyle] = NSUnderlineStyle.single.rawValue
             } else {
@@ -78,6 +78,32 @@ extension MemoListViewController: UITableViewDelegate, UITableViewDataSource {
                 }
                 self.configureTextView(for: cell.textView, with: sectionItem.memoText, isSwitchOn: cell.switchButton.isOn)
             }
+            cell.contentTextFieldAction = { [weak self] in
+                guard let self = self else { return }
+                
+                for category in categories {
+                    for sectionItem in category.items {
+                        if sectionItem.memoText == cell.textView.text {
+                            let foundCategory = category
+                            let MemoWriteVC = MemoWriteViewController()
+                            
+                            if let presentationController = MemoWriteVC.presentationController as? UISheetPresentationController {
+                                presentationController.detents = [
+                                    .medium(),
+                                ]
+                                presentationController.prefersGrabberVisible = true
+                            }
+                            MemoWriteVC.titleLabel.text = UISheetPaperType.update.typeValue
+                            MemoWriteVC.category = foundCategory.name
+                            MemoWriteVC.textContent.text = sectionItem.memoText
+                            self.present(MemoWriteVC, animated: true)
+                            
+                            break
+                        }
+                    }
+                }
+            }
+            
             return cell
         }else{
             return UITableViewCell()
@@ -103,33 +129,34 @@ extension MemoListViewController: UITableViewDelegate, UITableViewDataSource {
     }
 }
 
-class MemoListViewController : UIViewController{
-    var categories: [Category] = [
-        Category(name: "운동", items: [
-            SectionItem(memoText: "Text 1 - Section 1", isSwitchOn: true),
-            SectionItem(memoText: "Text 2 - Section 1", isSwitchOn: false),
-            SectionItem(memoText: "Text 3 - Section 1", isSwitchOn: true),
-            SectionItem(memoText: "Text 4 - Section 1", isSwitchOn: true),
-            SectionItem(memoText: "Text 5 - Section 1", isSwitchOn: true),
-            SectionItem(memoText: "Text 6 - Section 1", isSwitchOn: true),
-            SectionItem(memoText: "Text 7 - Section 1", isSwitchOn: true)
-        ]),
-        Category(name: "식사", items: [
-            SectionItem(memoText: "Text 8 - Section 2", isSwitchOn: false),
-            SectionItem(memoText: "Text 9 - Section 2", isSwitchOn: true),
-            SectionItem(memoText: "Text 10 - Section 2", isSwitchOn: true),
-            SectionItem(memoText: "Text 11 - Section 2", isSwitchOn: true),
-            SectionItem(memoText: "Text 12- Section 1", isSwitchOn: true),
-        ]),
-        Category(name: "음주", items: [
-            SectionItem(memoText: "Text 13 - Section 4", isSwitchOn: false),
-            SectionItem(memoText: "Text 14 - Section 3", isSwitchOn: true),
-            SectionItem(memoText: "Text 15 - Section 3", isSwitchOn: true),
-            SectionItem(memoText: "Text 16 - Section 3", isSwitchOn: true),
-            SectionItem(memoText: "Text 17 - Section 3", isSwitchOn: true),
-        ])
-    ]
-    
+var categories: [Category] = [
+    Category(name: "운동", items: [
+        SectionItem(memoText: "Text 1 - Section 1", isSwitchOn: true),
+        SectionItem(memoText: "Text 2 - Section 1", isSwitchOn: false),
+        SectionItem(memoText: "Text 3 - Section 1", isSwitchOn: true),
+        SectionItem(memoText: "Text 4 - Section 1", isSwitchOn: true),
+        SectionItem(memoText: "Text 5 - Section 1", isSwitchOn: true),
+        SectionItem(memoText: "Text 6 - Section 1", isSwitchOn: true),
+        SectionItem(memoText: "Text 7 - Section 1", isSwitchOn: true)
+    ]),
+    Category(name: "공부", items: [
+        SectionItem(memoText: "Text 8 - Section 2", isSwitchOn: false),
+        SectionItem(memoText: "Text 9 - Section 2", isSwitchOn: true),
+        SectionItem(memoText: "Text 10 - Section 2", isSwitchOn: true),
+        SectionItem(memoText: "Text 11 - Section 2", isSwitchOn: true),
+        SectionItem(memoText: "Text 12- Section 1", isSwitchOn: true),
+    ]),
+    Category(name: "모임", items: [
+        SectionItem(memoText: "Text 13 - Section 4", isSwitchOn: false),
+        SectionItem(memoText: "Text 14 - Section 3", isSwitchOn: true),
+        SectionItem(memoText: "Text 15 - Section 3", isSwitchOn: true),
+        SectionItem(memoText: "Text 16 - Section 3", isSwitchOn: true),
+        SectionItem(memoText: "Text 17 - Section 3", isSwitchOn: true),
+    ])
+]
+
+class MemoListViewController : UIViewController/*, TextChangedStatus*/{
+
     lazy var tableView : UITableView = {
         let tableView = UITableView(frame: .zero, style: .grouped)
         tableView.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
@@ -146,20 +173,20 @@ class MemoListViewController : UIViewController{
         setupSubviews()
         setupLayout()
         setupTableFHView()
-
+        
     }
+    
     func setupTableFHView(){
         let tableViewHeader = UIView(frame: CGRect(x: 0, y: 0 , width: view.bounds.width, height: headerHeight))
         tableViewHeader.backgroundColor = .white
         let headerLabel = UILabel()
         headerLabel.setupCustomLabelFont(text: "Todo List", isBold: true, textSize: 30)
         headerLabel.sizeToFit()
-
+        
         headerLabel.center.x = tableViewHeader.center.x
         headerLabel.center.y = tableViewHeader.frame.size.height / 2
-
+        
         tableViewHeader.addSubview(headerLabel)
-
         tableView.tableHeaderView = tableViewHeader
         
         let tableViewFooter = UIView(frame: CGRect(x: 0, y: 0, width: view.bounds.width, height: footerHeight))
@@ -167,14 +194,12 @@ class MemoListViewController : UIViewController{
         let footerLabel = UILabel()
         footerLabel.setupCustomLabelFont(text: "총 완료되지 않은 건은 n건입니다.", isBold: true, textSize: 30)
         footerLabel.sizeToFit()
-
+        
         footerLabel.center.x = tableViewFooter.center.x
         footerLabel.center.y = tableViewFooter.frame.size.height / 2
-
+        
         tableViewFooter.addSubview(footerLabel)
         tableView.tableFooterView = tableViewFooter
-        
-        
     }
     
     func setupNavigationBar(){
@@ -182,7 +207,15 @@ class MemoListViewController : UIViewController{
         navigationItem.rightBarButtonItem = addButton
     }
     @objc func addButtonTapped() {
-        print("추가 버튼 기능 필요")
+        let MemoCategoryVC = MemoCategoryViewController()
+        if let presentationController = MemoCategoryVC.presentationController as? UISheetPresentationController {
+            presentationController.detents = [
+                .medium(),
+            ]
+            presentationController.prefersGrabberVisible = true
+        }
+        self.present(MemoCategoryVC, animated: true)
+        
     }
     
     func setupSubviews(){
@@ -191,100 +224,11 @@ class MemoListViewController : UIViewController{
     
     func setupLayout() {
         tableView.snp.makeConstraints { make in
-            make.leading.equalTo(view.safeAreaLayoutGuide.snp.leading) // 왼쪽을 safeArea에 맞춤
-            make.trailing.equalTo(view.safeAreaLayoutGuide.snp.trailing) // 오른쪽을 safeArea에 맞춤
+            make.leading.equalTo(view.safeAreaLayoutGuide.snp.leading)
+            make.trailing.equalTo(view.safeAreaLayoutGuide.snp.trailing)
             make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(20)
-            make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom) // 아래를 safeArea 바텀에 맞춤
+            make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
         }
     }
     
 }
-
-
-//extension MemoListViewController : UITableViewDelegate, UITableViewDataSource{
-//    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-//        if let cell = tableView.dequeueReusableCell(withIdentifier: "customCell") as? CustomCell {
-//            let memo = sharedInstance.getMemoList()[indexPath.item]
-//            cell.contentLb.text = memo.content
-//            cell.switchBtn.isOn = memo.switchIsOn
-//            var attributes: [NSAttributedString.Key: Any] = [:]
-//            if  memo.switchIsOn {
-//                attributes[.strikethroughStyle] = NSUnderlineStyle.single.rawValue
-//            }
-//            cell.contentLb.attributedText = NSAttributedString(string: memo.content, attributes: attributes)
-//            return cell
-//        }
-//        return UITableViewCell()
-//    }
-//    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-//        if let memoDetailViewController = storyboard?.instantiateViewController(withIdentifier: "MemoDetailVC") as? MemoDetailViewController {
-//            let memo = sharedInstance.getMemoList()[indexPath.item]
-//            selectedIndex = indexPath.item
-//            memoDetailViewController.content = memo.content
-//            memoDetailViewController.EditDelegate = self
-//            self.navigationController?.pushViewController(memoDetailViewController, animated: true)
-//        }
-//    }
-//    
-//    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-//        let deleteAction = UIContextualAction(style: .destructive, title: "Delete") {  (_, _, completionHandler) in
-//            self.sharedInstance.deleteMemo(index: indexPath.item)
-//            tableView.reloadData()
-//            completionHandler(true)
-//        }
-//        deleteAction.image = UIImage(systemName: "trash")
-//        return UISwipeActionsConfiguration(actions: [deleteAction])
-//    }
-//    
-//    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-//        return sharedInstance.getMemoList().count
-//    }
-//}
-//extension MemoListViewController : EditMemoDelegate{
-//    func didEditPerformd(_ content: String) {
-//        sharedInstance.updateMemo(index: selectedIndex, content: content)
-//        listTableView.reloadData()
-//    }
-//}
-//
-//
-//class MemoListViewController: UIViewController {
-//    
-//    @IBOutlet weak var addButton: UIBarButtonItem!
-//    @IBOutlet weak var backButton: UIBarButtonItem!
-//    @IBOutlet weak var listTableView: UITableView!
-//    let sharedInstance = RealmManager.Instance
-//    var selectedIndex : Int = 0
-//    @IBAction func addMemoButtonClicked(_ sender: Any) {
-//        let AddMemoController =  UIAlertController(title: "항목 추가", message: "내용을 입력해주세요.", preferredStyle: .alert)
-//        AddMemoController.addTextField(configurationHandler: { _ in
-//        })
-//        let OKAction = UIAlertAction(title: "OK", style: .default) {  _ in
-//            if let text = AddMemoController.textFields?.first?.text {
-//                if text != ""{
-//                    self.sharedInstance.createMemo(memo : Memo(content: text, switchIsOn: false))
-//                    self.listTableView.reloadData()
-//                }else{
-//                    self.showAlert(title: "에러", message: "내용이 입력되지 않아 항목이 추가되지 않았습니다.")
-//                }
-//            }
-//        }
-//        let CancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in
-//            AddMemoController.dismiss(animated: true)
-//        }
-//        AddMemoController.addAction(OKAction)
-//        AddMemoController.addAction(CancelAction)
-//        self.present(AddMemoController, animated: true)
-//    }
-//    
-//    @IBAction func BackbuttonClicked(_ sender: Any) {
-//        self.navigationController?.popViewController(animated: true)
-//    }
-//    
-//    override func viewDidLoad() {
-//        super.viewDidLoad()
-//        listTableView.dataSource = self
-//        listTableView.delegate = self
-//        listTableView.register(CustomCell.self, forCellReuseIdentifier: "CustomCell")
-//    }
-//}

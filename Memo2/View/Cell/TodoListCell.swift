@@ -7,11 +7,12 @@
 
 import UIKit
 
-class TodoListCell : UITableViewCell{
+class TodoListCell : UITableViewCell, UITextViewDelegate{
     lazy var textView: UITextView = {
         let textView = UITextView()
         textView.isScrollEnabled = false
         textView.font = UIFont.systemFont(ofSize: 30)
+        textView.tintColor = .clear
         return textView
     }()
     
@@ -23,16 +24,20 @@ class TodoListCell : UITableViewCell{
         return switchButton
     }()
     var switchButtonAction: (() -> Void)?
+    var contentTextFieldAction : (()-> Void)?
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupSubviews()
         setupLayout()
         switchButton.addTarget(self, action: #selector(switchButtonTapped), for: .touchUpInside)
-        
+        textView.delegate = self
     }
     @objc func switchButtonTapped(){
         self.switchButtonAction?()
+    }
+    @objc func textViewDidBeginEditing(_ textView: UITextView) {
+        self.contentTextFieldAction?()
     }
     
     required init?(coder aDecoder: NSCoder) {

@@ -30,12 +30,13 @@ import Foundation
 //    }
 //}
 
-struct SectionItem {
-    var memoText: String
-    var isSwitchOn: Bool
-}
-
 struct Category {
     var name: String
     var items: [SectionItem]
+}
+
+struct SectionItem {
+    var memoText: String
+    var isSwitchOn: Bool
+    var writeTime : Date?
 }

@@ -8,17 +8,11 @@
 import UIKit
 
 extension UIButton {
-    func setupCustomButtonUI(){
-        self.backgroundColor = UIColor(red: 0.5, green: 0.7, blue: 0.5, alpha: 1.0)
+    func setupCustomButtonUI(red : CGFloat = 0.5, green : CGFloat = 0.7, blue : CGFloat = 0.5, alpha : CGFloat = 1.0){
+        self.backgroundColor = UIColor(red: red, green: green, blue: blue, alpha: alpha)
         self.setTitleColor(.blue, for: .normal)
         self.layer.cornerRadius = 10.0
-    }
-    func setupCustomMoveButtonUI(){
-        self.backgroundColor = UIColor(red: 0.5, green: 0.7, blue: 1.0, alpha: 1.0)
-        self.setTitleColor(.blue, for: .normal)
-        self.layer.cornerRadius = 10.0
-    }
-    
+    }    
     func setupCustomButtonFont(){
         let buttonFont = UIFont(name: "Helvetica-Bold", size: 17.0)
         self.titleLabel?.font = buttonFont
