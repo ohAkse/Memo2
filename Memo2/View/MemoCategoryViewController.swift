@@ -9,14 +9,12 @@ import UIKit
 
 class MemoCategoryViewController : UIViewController
 {
-    
     lazy var titleLabel : UILabel = {
         let label = UILabel()
         label.setupCustomLabelFont(text: UISheetPaperType.category.typeValue, isBold: true)
         label.textAlignment = .center
         return label
     }()
-    
     lazy var workoutButton : UIButton = {
         let button = UIButton(type: .system)
         button.setTitle(CategoryType.workout.typeValue, for: .normal)
@@ -25,7 +23,6 @@ class MemoCategoryViewController : UIViewController
         button.setupCustomButtonFont()
         return button
     }()
-    
     lazy var studytButton : UIButton = {
         let button = UIButton(type: .system)
         button.setTitle(CategoryType.study.typeValue, for: .normal)
@@ -42,7 +39,6 @@ class MemoCategoryViewController : UIViewController
         button.setupCustomButtonFont()
         return button
     }()
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
@@ -56,7 +52,6 @@ class MemoCategoryViewController : UIViewController
         view.addSubview(studytButton)
         view.addSubview(meetingButton)
     }
-    
     func setupLayout() {
         titleLabel.snp.makeConstraints { make in
             make.centerX.equalToSuperview() // 수평 가운데 정렬
@@ -99,8 +94,6 @@ class MemoCategoryViewController : UIViewController
         MemoWriteVC.category = CategoryType.workout.typeValue
         self.present(MemoWriteVC, animated: true)
     }
-
-    
     @objc func studytButtonTapped(){
         let MemoWriteVC = MemoWriteViewController()
         if let presentationController = MemoWriteVC.presentationController as? UISheetPresentationController {

@@ -10,106 +10,37 @@ let footerHeight = 40.0
 let headerHeight = 40.0
 let cellFontSize = 24.0
 extension MemoListViewController: UITableViewDelegate, UITableViewDataSource {
-    
-    ///MARK : 섹션 헤더
-    // 섹션 헤더의 높이를 설정
-    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        return footerHeight // 원하는 높이로 설정
-    }
-    // 섹션 헤더의 내용을 설정
-    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+    ///MARK : 커스텀 함수
+    private func createSectionHeaderView(title: String) -> UIView {
         let headerView = UIView()
         headerView.backgroundColor = .lightGray
-        let category = categories[section]
+        
         let headerLabel = UILabel()
-        headerLabel.setupCustomLabelFont(text: category.name, isBold: false, textSize : 20)
-        headerLabel.frame = CGRect(x: 20, y: ( ((headerHeight)/2) - headerLabel.frame.size.height) / 2,width: tableView.bounds.width, height: headerLabel.intrinsicContentSize.height)
+        headerLabel.setupCustomLabelFont(text: title, isBold: false, textSize: 20)
+        headerLabel.frame = CGRect(x: 20, y: (((footerHeight) / 2) - headerLabel.frame.size.height) / 2, width: tableView.bounds.width, height: headerLabel.intrinsicContentSize.height)
+        
         headerView.addSubview(headerLabel)
         return headerView
     }
     
-    ///MARK : 섹션 푸터
-    // 섹션 푸터의 높이를 설정
-    func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
-        return headerHeight
-    }
-    // 섹션 푸터의 내용을 설정
-    func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+    private func createSectionFooterView(text: String) -> UIView {
         let footerView = UIView()
-        let footerLabelLabel = UILabel()
-        footerLabelLabel.setupCustomLabelFont(text: "완료되지 않은 항목은 총 \(section)건 입니다.", isBold: false, textSize : 20)
-        footerLabelLabel.frame = CGRect(x: 20, y: ( ((footerHeight)/2) - footerLabelLabel.frame.size.height) / 2, width: tableView.bounds.width, height: footerLabelLabel.intrinsicContentSize.height)
-        footerView.addSubview(footerLabelLabel)
+        
+        let footerLabel = UILabel()
+        footerLabel.setupCustomLabelFont(text: text, isBold: false, textSize: 20)
+        footerLabel.frame = CGRect(x: 20, y: (((footerHeight) / 2) - footerLabel.frame.size.height) / 2, width: tableView.bounds.width, height: footerLabel.intrinsicContentSize.height)
+        
+        footerView.addSubview(footerLabel)
         return footerView
     }
-    func numberOfSections(in tableView: UITableView) -> Int {
-        return categories.count
-    }
     
-    ///MARK : 셀 관련
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return categories[section].items.count
-    }
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if let cell = tableView.dequeueReusableCell(withIdentifier: "TodoListCell") as? TodoListCell {
-            let category = categories[indexPath.section]
-            let sectionItem = category.items[indexPath.row]
-            
-            cell.textView.text = sectionItem.memoText
-            cell.switchButton.isOn = sectionItem.isSwitchOn
-            
-            var attributes: [NSAttributedString.Key: Any] = [:]
-
-            attributes[.font] = UIFont.systemFont(ofSize: cellFontSize)
-
-            if cell.switchButton.isOn {
-                attributes[.strikethroughStyle] = NSUnderlineStyle.single.rawValue
-            } else {
-                attributes.removeValue(forKey: .strikethroughStyle)
+    func findSectionItem(with text: String) -> (category: String, item: SectionItem)? {
+        for category in categories {
+            if let sectionItem = category.items.first(where: { $0.memoText == text }) {
+                return (category.name, sectionItem)
             }
-            configureTextView(for: cell.textView, with: sectionItem.memoText, isSwitchOn: cell.switchButton.isOn)
-            
-            cell.switchButtonAction = { [weak self] in
-                guard let self = self else {
-                    return
-                }
-                self.configureTextView(for: cell.textView, with: sectionItem.memoText, isSwitchOn: cell.switchButton.isOn)
-            }
-            cell.contentTextFieldAction = { [weak self] in
-                guard let self = self else { return }
-                // 셀에서 모달이 이미 열려 있는지 확인
-                if self.presentedViewController == nil {
-                    for category in categories {
-                        for sectionItem in category.items {
-                            if sectionItem.memoText == cell.textView.text {
-                                let foundCategory = category
-                                let MemoWriteVC = MemoWriteViewController()
-
-                                if let presentationController = MemoWriteVC.presentationController as? UISheetPresentationController {
-                                    presentationController.detents = [
-                                        .medium(),
-                                    ]
-                                    presentationController.prefersGrabberVisible = true
-                                }
-                                MemoWriteVC.titleLabel.text = UISheetPaperType.update.typeValue
-                                MemoWriteVC.category = foundCategory.name
-                                MemoWriteVC.textContent.text = sectionItem.memoText
-                                self.present(MemoWriteVC, animated: true)
-
-                                break
-                            }
-                        }
-                    }
-                }
-            }
-            return cell
-        }else{
-            return UITableViewCell()
         }
-    }
-    
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 70
+        return nil
     }
     
     func configureTextView(for textView: UITextView, with text: String, isSwitchOn: Bool) {
@@ -122,43 +53,111 @@ extension MemoListViewController: UITableViewDelegate, UITableViewDataSource {
         }
         textView.attributedText = NSAttributedString(string: text, attributes: attributes)
     }
+    
+    ///MARK : 섹션 헤더
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        return footerHeight // 원하는 높이로 설정
+    }
+    
+    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+        let category = categories[section]
+        return createSectionHeaderView(title: category.name)
+    }
+
+    ///MARK : 섹션 푸터
+    func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
+        return headerHeight
+    }
+    
+    func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+        let category = categories[section]
+        let text = "완료되지 않은 항목은 총 \(category.items.filter{$0.isSwitchOn == false}.count)건 입니다."
+        return createSectionFooterView(text: text)
+    }
+    ///MARK : 셀
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return categories.count
+    }
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return categories[section].items.count
+    }
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "TodoListCell") as? TodoListCell else {
+            return UITableViewCell()
+        }
+        
+        let category = categories[indexPath.section]
+        let sectionItem = category.items[indexPath.row]
+        
+        cell.textView.text = sectionItem.memoText
+        cell.switchButton.isOn = sectionItem.isSwitchOn
+        
+        var attributes: [NSAttributedString.Key: Any] = [
+            .font: UIFont.systemFont(ofSize: cellFontSize)
+        ]
+        
+        if cell.switchButton.isOn {
+            attributes[.strikethroughStyle] = NSUnderlineStyle.single.rawValue
+        }
+        
+        configureTextView(for: cell.textView, with: sectionItem.memoText, isSwitchOn: cell.switchButton.isOn)
+        
+        cell.switchButtonAction = { [weak self] in
+            guard let self = self else { return }
+            instance.updateData(category: category.name, cellIndex: indexPath.row, content: sectionItem.memoText, isSwitchOn: cell.switchButton.isOn)
+            configureTextView(for: cell.textView, with: sectionItem.memoText, isSwitchOn: cell.switchButton.isOn)
+            
+            updateFooterLabel(with: uncompletedItemListCount, isOn : cell.switchButton.isOn)
+            
+            tableView.reloadData()
+            
+        }
+        
+        cell.contentTextFieldAction = { [weak self] in
+            guard let self = self, let text = cell.textView.text else { return }
+            if self.presentedViewController != nil { return }
+            if let item = self.findSectionItem(with: text) {
+                let MemoWriteVC = MemoWriteViewController()
+                if let presentationController = MemoWriteVC.presentationController as? UISheetPresentationController {
+                    presentationController.detents = [.medium()]
+                    presentationController.prefersGrabberVisible = true
+                }
+                MemoWriteVC.titleLabel.text = UISheetPaperType.update.typeValue
+                MemoWriteVC.category = item.category
+                MemoWriteVC.selectedItem = item.item
+                MemoWriteVC.textContent.text = text
+                self.present(MemoWriteVC, animated: true)
+            }
+        }
+        return cell
+    }
+    func updateFooterLabel(with count: Int, isOn : Bool) {
+        uncompletedItemListCount = isOn ? uncompletedItemListCount - 1 : uncompletedItemListCount + 1
+        let text = "총 \(uncompletedItemListCount)개 항목이 완료되지 않았습니다."
+        if let footerLabel = tableView.tableFooterView?.subviews.first as? UILabel {
+            footerLabel.text = text
+            footerLabel.sizeToFit()
+        }
+    }
+ 
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 70
+    }
+    //MARK : 스와이프시 삭제
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        let deleteAction = UIContextualAction(style: .destructive, title: "Delete") {  [weak self] (_, _, completionHandler) in
+            guard let self = self else { return }
+            let category = categories[indexPath.section]
+            let sectionItem = category.items[indexPath.row]
+            instance.deleteData(category: category.name, content: sectionItem.memoText)
+            tableView.reloadData()
+            completionHandler(true)
+        }
+        deleteAction.image = UIImage(systemName: "trash")
+        return UISwipeActionsConfiguration(actions: [deleteAction])
+    }
 }
-
-var categories: [Category] = [
-    Category(name: "운동", items: [
-        SectionItem(memoText: "Text 1 - Section 1", isSwitchOn: true),
-        SectionItem(memoText: "Text 2 - Section 1", isSwitchOn: false),
-        SectionItem(memoText: "Text 3 - Section 1", isSwitchOn: true),
-        SectionItem(memoText: "Text 4 - Section 1", isSwitchOn: true),
-        SectionItem(memoText: "Text 5 - Section 1", isSwitchOn: false),
-        SectionItem(memoText: "Text 6 - Section 1", isSwitchOn: true),
-        SectionItem(memoText: "Text 7 - Section 1", isSwitchOn: false),
-        SectionItem(memoText: "Text 5 - Section 1", isSwitchOn: true),
-        SectionItem(memoText: "Text 6 - Section 1", isSwitchOn: false),
-        SectionItem(memoText: "Text 7 - Section 1", isSwitchOn: true),
-        SectionItem(memoText: "Text 5 - Section 1", isSwitchOn: true),
-        SectionItem(memoText: "Text 6 - Section 1", isSwitchOn: false),
-        SectionItem(memoText: "Text 7 - Section 1", isSwitchOn: true),
-        SectionItem(memoText: "Text 5 - Section 1", isSwitchOn: true),
-        SectionItem(memoText: "Text 6 - Section 1", isSwitchOn: true),
-        SectionItem(memoText: "Text 7 - Section 1", isSwitchOn: true)
-    ]),
-    Category(name: "공부", items: [
-        SectionItem(memoText: "Text 8 - Section 2", isSwitchOn: false),
-        SectionItem(memoText: "Text 9 - Section 2", isSwitchOn: true),
-        SectionItem(memoText: "Text 10 - Section 2", isSwitchOn: true),
-        SectionItem(memoText: "Text 11 - Section 2", isSwitchOn: true),
-        SectionItem(memoText: "Text 12- Section 1", isSwitchOn: true),
-    ]),
-    Category(name: "모임", items: [
-        SectionItem(memoText: "Text 13 - Section 4", isSwitchOn: false),
-        SectionItem(memoText: "Text 14 - Section 3", isSwitchOn: true),
-        SectionItem(memoText: "Text 15 - Section 3", isSwitchOn: true),
-        SectionItem(memoText: "Text 16 - Section 3", isSwitchOn: true),
-        SectionItem(memoText: "Text 17 - Section 3", isSwitchOn: true),
-    ])
-]
-
 class MemoListViewController : UIViewController{
     lazy var tableView : UITableView = {
         let tableView = UITableView(frame: .zero, style: .grouped)
@@ -169,39 +168,68 @@ class MemoListViewController : UIViewController{
         tableView.dataSource = self
         return tableView
     }()
+    
+    let total = categories.reduce(0) { (count, category) in
+        let categoryCount = category.items.reduce(0) { (itemCount, sectionItem) in
+            return itemCount + (sectionItem.isSwitchOn ? 1 : 0)
+        }
+        return count + categoryCount
+    }
+    
+    let instance = LocalDBManager.instance
+    var uncompletedItemListCount = categories.reduce(0) { (count, category) in
+        let categoryCount = category.items.reduce(0) { (itemCount, sectionItem) in
+            return itemCount + (sectionItem.isSwitchOn == false  ? 1 : 0)
+        }
+        return count + categoryCount
+    }
     override func viewDidLoad() {
         super.viewDidLoad()
         setupNavigationBar()
         setupSubviews()
         setupLayout()
         setupTableFHView()
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(DidReceiveTextChangeCommitStatus),
+            name: .textChangeStatus,
+            object: nil
+        )
     }
+    @objc func DidReceiveTextChangeCommitStatus(_ notification: Notification) {
+        if let status = notification.object as? TextChangeCommitStatus {
+            if status == .Success
+            {
+                Toast.showToast(message: "요청이 성공적으로 처리되었습니다.", errorMessage: [], font: UIFont.systemFont(ofSize: 14.0), controllerView: self)
+                tableView.reloadData()
+            }
+        }
+    }
+    
+    
     func setupTableFHView(){
+        //테이블뷰 헤더
         let tableViewHeader = UIView(frame: CGRect(x: 0, y: 0 , width: view.bounds.width, height: headerHeight))
         tableViewHeader.backgroundColor = .white
         let headerLabel = UILabel()
         headerLabel.setupCustomLabelFont(text: "Todo List", isBold: true, textSize: 30)
         headerLabel.sizeToFit()
-        
         headerLabel.center.x = tableViewHeader.center.x
         headerLabel.center.y = tableViewHeader.frame.size.height / 2
-        
         tableViewHeader.addSubview(headerLabel)
         tableView.tableHeaderView = tableViewHeader
         
+        //테이블뷰 푸터
         let tableViewFooter = UIView(frame: CGRect(x: 0, y: 0, width: view.bounds.width, height: footerHeight))
         tableViewFooter.backgroundColor = .gray
         let footerLabel = UILabel()
-        footerLabel.setupCustomLabelFont(text: "총 완료되지 않은 건은 n건입니다.", isBold: true, textSize: 30)
+        footerLabel.setupCustomLabelFont(text: "총 \(uncompletedItemListCount)개 항목이 완료되지 않았습니다.", isBold: true, textSize: 20)
         footerLabel.sizeToFit()
-        
         footerLabel.center.x = tableViewFooter.center.x
         footerLabel.center.y = tableViewFooter.frame.size.height / 2
-        
         tableViewFooter.addSubview(footerLabel)
         tableView.tableFooterView = tableViewFooter
     }
-    
     func setupNavigationBar(){
         let addButton = UIBarButtonItem(image: UIImage(systemName: "plus"), style: .plain, target: self, action: #selector(addButtonTapped))
         navigationItem.rightBarButtonItem = addButton
@@ -216,11 +244,9 @@ class MemoListViewController : UIViewController{
         }
         self.present(MemoCategoryVC, animated: true)
     }
-    
     func setupSubviews(){
         view.addSubview(tableView)
     }
-    
     func setupLayout() {
         tableView.snp.makeConstraints { make in
             make.leading.equalTo(view.safeAreaLayoutGuide.snp.leading)
@@ -229,5 +255,4 @@ class MemoListViewController : UIViewController{
             make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
         }
     }
-    
 }

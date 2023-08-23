@@ -37,9 +37,7 @@ class MemoHomeViewController : UIViewController{
         super.viewDidLoad()
         setupSubviews()
         setupLayout()
-        
     }
-
     func setupSubviews(){
         view.addSubview(mainImageView)
         view.addSubview(moveToListButton)
@@ -52,14 +50,12 @@ class MemoHomeViewController : UIViewController{
             make.top.equalTo(view.safeAreaLayoutGuide.snp.top)
             make.width.equalTo(250)
         }
-        
         moveToListButton.snp.makeConstraints { make in
             make.centerX.equalToSuperview()
             make.top.equalTo(mainImageView.snp.bottom).offset(60)
             make.width.equalTo(250)
             make.height.equalTo(100)
         }
-        
         moveToCompleteButton.snp.makeConstraints { make in
             make.centerX.equalToSuperview()
             make.top.equalTo(moveToListButton.snp.bottom).offset(30)
@@ -68,9 +64,7 @@ class MemoHomeViewController : UIViewController{
             make.height.equalTo(100)
         }
     }
-    
     @objc func moveToListButtonTapped(){
-
         let memoListVC = MemoListViewController()
         UIView.transition(with: navigationController!.view, duration: 0.5, options: .transitionFlipFromBottom, animations: {
             self.navigationController?.pushViewController(memoListVC, animated: false)
@@ -79,8 +73,6 @@ class MemoHomeViewController : UIViewController{
     @objc func moveToCompletsButtonTapped(){
         let memoListVC = MemoCompleteViewController()
         present(memoListVC, animated: true, completion: nil)
-        //let navigationController = UINavigationController(rootViewController: memoListVC)
-        //present(navigationController, animated: true, completion: nil)
     }
 }
 

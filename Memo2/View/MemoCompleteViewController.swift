@@ -11,29 +11,24 @@ extension MemoCompleteViewController: UITableViewDelegate, UITableViewDataSource
     
     ///MARK : 셀 관련
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return categories[section].items.count
+        return filterData.count
     }
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        if let cell = tableView.dequeueReusableCell(withIdentifier: "TodoListCell") as? TodoListCell {
-            let category = categories[indexPath.section]
-            let sectionItem = category.items[indexPath.row]
-            cell.selectionStyle = .none
-            cell.textView.text = sectionItem.memoText
-            cell.textView.isUserInteractionEnabled = false
-            cell.switchButton.isHidden = true
-
-            return cell
-        }else{
-            return UITableViewCell()
-        }
+        
+                if let cell = tableView.dequeueReusableCell(withIdentifier: "TodoListCell") as? TodoListCell {
+                    cell.selectionStyle = .none
+                    cell.textView.text = filterData[indexPath.row].memoText
+                    cell.textView.isUserInteractionEnabled = false
+                    cell.switchButton.isHidden = true
+                    return cell
+                }else{
+                    return UITableViewCell()
+                }
     }
-    
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 70
     }
-
 }
-
 class MemoCompleteViewController : UIViewController{
     lazy var titleLabel : UILabel = {
         let label = UILabel()
@@ -41,7 +36,6 @@ class MemoCompleteViewController : UIViewController{
         label.textAlignment = .center
         return label
     }()
-    
     lazy var tableView : UITableView = {
         let tableView = UITableView(frame: .zero, style: .plain)
         tableView.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
@@ -51,7 +45,6 @@ class MemoCompleteViewController : UIViewController{
         tableView.dataSource = self
         return tableView
     }()
-    
     lazy var ascendingButton : UIButton = {
         let button = UIButton(type: .system)
         button.addTarget(self, action: #selector(ascendingButtonTapped), for: .touchUpInside)
@@ -71,22 +64,40 @@ class MemoCompleteViewController : UIViewController{
         return button
     }()
     var categoryMenu = UIMenu(title: "", children: [])
+    var category : String = ""
+    let instance = LocalDBManager.instance
+    var filterData : [SectionItem] = []
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
         setupSubviews()
         setupLayout()
         setupCategoryMenu()
+        filterData = instance.readData(category: .workout).filter{$0.isSwitchOn == true} //초기데이터 설정
     }
     func setupCategoryMenu(){
         var menuItems: [UIMenuElement] = []
-        menuItems.append(UIAction(title: "운동", image: UIImage(systemName: "pencil")) { _ in
-            print("운동로직 테이블뷰에..")
+        menuItems.append(UIAction(title: CategoryType.workout.typeValue, image: UIImage(systemName: "pencil")) { [weak self] _ in
+            guard let self = self else {
+                return
+            }
+            filterData = instance.readData(category: .workout).filter{$0.isSwitchOn == true}
+            tableView.reloadData()
+            print("운동 테이블뷰에..")
         })
-        menuItems.append(UIAction(title: "공부", image: UIImage(systemName: "pencil")) { _ in
-            print("공부 테이블뷰에..")
+        menuItems.append(UIAction(title: CategoryType.study.typeValue, image: UIImage(systemName: "pencil")) { [weak self] _ in
+            guard let self = self else {
+                return
+            }
+            filterData = instance.readData(category: .study).filter{$0.isSwitchOn == true}
+            tableView.reloadData()
         })
-        menuItems.append(UIAction(title: "모임", image: UIImage(systemName: "pencil")) { _ in
+        menuItems.append(UIAction(title: CategoryType.meeting.typeValue, image: UIImage(systemName: "pencil")) { [weak self] _ in
+            guard let self = self else {
+                return
+            }
+            filterData = instance.readData(category: .meeting).filter{$0.isSwitchOn == true}
+            tableView.reloadData()
             print("모인 테이블뷰에..")
         })
         let menu = UIMenu(title: "", children: menuItems)
@@ -137,10 +148,12 @@ class MemoCompleteViewController : UIViewController{
         }
     }
     @objc func ascendingButtonTapped(){
-        print("오름차순 추가")
+        filterData.sort { $0.memoText < $1.memoText }
+        tableView.reloadData()
     }
     @objc func descendingButtonTapped(){
-        print("내림차순 추가")
+        filterData.sort { $0.memoText > $1.memoText }
+        tableView.reloadData()
     }
 }
 

@@ -14,8 +14,6 @@ class MemoWriteViewController : UIViewController, UITextViewDelegate
         label.textAlignment = .center
         return label
     }()
-    
-    //textField의 contentEdgeInsets은 Deprecated됨
     lazy var textContent : UITextView = {
         let textView = UITextView()
         textView.delegate = self
@@ -33,19 +31,21 @@ class MemoWriteViewController : UIViewController, UITextViewDelegate
         button.setupCustomButtonFont()
         return button
     }()
-    
     var category : String = ""
-    
+    var originText : String = ""
+    let instance = LocalDBManager.instance
+    var selectedItem : SectionItem?
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(true)
     }
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
         print(category)
         setupSubviews()
         setupLayout()
+        
+        originText = textContent.text//나중에 기존 textContent기준으로 된거 오리진으로 일단 처리할것.
     }
     
     func setupSubviews(){
@@ -78,15 +78,18 @@ class MemoWriteViewController : UIViewController, UITextViewDelegate
     @objc func confirmButtonTapped(){
         if textContent.text != ""{
             if titleLabel.text == UISheetPaperType.update.typeValue{
-                self.dismiss(animated: true)
+                if let item = selectedItem{
+                    instance.updateData(category: category, originText: originText, changeText: textContent.text)
+                    self.dismiss(animated: true)
+                }
             }else{
+                instance.createData(category: category, item: SectionItem(memoText: textContent.text, isSwitchOn: false))
                 self.presentingViewController?.presentingViewController?.dismiss(animated: true, completion: nil)
             }
-            NotificationCenter.default.post(name: .textChangeStatus, object: TextChangeCommitStatus.Success.typeValue)
+            
+            NotificationCenter.default.post(name: .textChangeStatus, object: TextChangeCommitStatus.Success)
         }else{
             self.showAlert(title: "에러", message: "내용을 추가해주세요")
         }
     }
-    
-    
 }

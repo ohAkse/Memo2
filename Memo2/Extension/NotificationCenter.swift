@@ -7,5 +7,5 @@
 
 import Foundation
 extension NSNotification.Name {
-    static let textChangeStatus = NSNotification.Name("TextChangeStatus")
+    static let textChangeStatus = NSNotification.Name("TextChangeCommitStatus")
 }

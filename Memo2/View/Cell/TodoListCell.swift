@@ -13,7 +13,7 @@ class TodoListCell : UITableViewCell, UITextViewDelegate{
         textView.isScrollEnabled = false
         textView.font = UIFont.systemFont(ofSize: cellFontSize)
         textView.tintColor = .clear
-        
+        textView.delegate = self
         return textView
     }()
     
@@ -22,6 +22,7 @@ class TodoListCell : UITableViewCell, UITextViewDelegate{
         switchButton.isOn = false
         switchButton.onTintColor = UIColor.blue
         switchButton.tintColor = UIColor.red
+        switchButton.addTarget(self, action: #selector(switchButtonTapped), for: .touchUpInside)
         return switchButton
     }()
     var switchButtonAction: (() -> Void)?
@@ -31,8 +32,6 @@ class TodoListCell : UITableViewCell, UITextViewDelegate{
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupSubviews()
         setupLayout()
-        switchButton.addTarget(self, action: #selector(switchButtonTapped), for: .touchUpInside)
-        textView.delegate = self
     }
     @objc func switchButtonTapped(){
         self.switchButtonAction?()

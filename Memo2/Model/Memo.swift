@@ -6,37 +6,11 @@
 //
 
 import Foundation
-
-//수정 예정..
-//struct Memo {
-//    var content: String
-//    var insertDate: Date
-//    var switchIsOn: Bool
-//     init() {
-//        self.content = ""
-//        self.insertDate = Date()
-//        self.switchIsOn = false
-//
-//    }
-//
-//    init(content: String, insertDate: Date = Date(), switchIsOn: Bool) {
-//        self.content = content
-//        self.insertDate = insertDate
-//        self.switchIsOn = switchIsOn
-//    }
-//
-//    init(updatedContent: String, switchIsOn: Bool) {
-//        self.init(content: updatedContent, switchIsOn: switchIsOn)
-//    }
-//}
-
 struct Category {
     var name: String
     var items: [SectionItem]
 }
-
 struct SectionItem {
     var memoText: String
     var isSwitchOn: Bool
-    var writeTime : Date?
 }
