@@ -6,11 +6,11 @@
 //
 
 import Foundation
-struct Category {
+struct Category :  Codable {
     var name: String
     var items: [SectionItem]
 }
-struct SectionItem {
+struct SectionItem  : Codable{
     var memoText: String
     var isSwitchOn: Bool
 }

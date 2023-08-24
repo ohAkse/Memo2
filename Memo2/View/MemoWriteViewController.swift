@@ -44,7 +44,6 @@ class MemoWriteViewController : UIViewController, UITextViewDelegate
         print(category)
         setupSubviews()
         setupLayout()
-        
         originText = textContent.text//나중에 기존 textContent기준으로 된거 오리진으로 일단 처리할것.
     }
     
@@ -66,7 +65,7 @@ class MemoWriteViewController : UIViewController, UITextViewDelegate
             make.top.equalTo(titleLabel.snp.bottom)
             make.leading.equalTo(view.safeAreaLayoutGuide.snp.leading).offset(20)
             make.trailing.equalTo(view.safeAreaLayoutGuide.snp.trailing).offset(-20)
-            make.height.equalTo(300)
+            make.height.equalTo(270)
         }
         confirmButton.snp.makeConstraints { make in
             make.top.equalTo(textContent.snp.bottom).offset(10)

@@ -67,12 +67,16 @@ class MemoCompleteViewController : UIViewController{
     var category : String = ""
     let instance = LocalDBManager.instance
     var filterData : [SectionItem] = []
+
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
         setupSubviews()
         setupLayout()
         setupCategoryMenu()
+        
+
         filterData = instance.readData(category: .workout).filter{$0.isSwitchOn == true} //초기데이터 설정
     }
     func setupCategoryMenu(){

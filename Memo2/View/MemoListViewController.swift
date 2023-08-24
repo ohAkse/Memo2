@@ -89,34 +89,37 @@ extension MemoListViewController: UITableViewDelegate, UITableViewDataSource {
         
         let category = categories[indexPath.section]
         let sectionItem = category.items[indexPath.row]
-        
+
         cell.textView.text = sectionItem.memoText
         cell.switchButton.isOn = sectionItem.isSwitchOn
-        
+
         var attributes: [NSAttributedString.Key: Any] = [
             .font: UIFont.systemFont(ofSize: cellFontSize)
         ]
-        
+
         if cell.switchButton.isOn {
             attributes[.strikethroughStyle] = NSUnderlineStyle.single.rawValue
         }
-        
+
         configureTextView(for: cell.textView, with: sectionItem.memoText, isSwitchOn: cell.switchButton.isOn)
         
         cell.switchButtonAction = { [weak self] in
             guard let self = self else { return }
-            instance.updateData(category: category.name, cellIndex: indexPath.row, content: sectionItem.memoText, isSwitchOn: cell.switchButton.isOn)
-            configureTextView(for: cell.textView, with: sectionItem.memoText, isSwitchOn: cell.switchButton.isOn)
-            
-            updateFooterLabel(with: uncompletedItemListCount, isOn : cell.switchButton.isOn)
-            
-            tableView.reloadData()
+            DispatchQueue.main.async{ [weak self] in
+                guard let self = self else { return }
+                instance.updateData(category: category.name, cellIndex: indexPath.row, content: sectionItem.memoText, isSwitchOn: cell.switchButton.isOn)
+                configureTextView(for: cell.textView, with: sectionItem.memoText, isSwitchOn: cell.switchButton.isOn)
+                updateFooterLabel(with: uncompletedItemListCount, isOn : cell.switchButton.isOn)
+                categories = instance.getCategoriesFromUserDefaults()
+                tableView.reloadData()
+            }
             
         }
         
         cell.contentTextFieldAction = { [weak self] in
             guard let self = self, let text = cell.textView.text else { return }
             if self.presentedViewController != nil { return }
+            print("contentText button@@@@@@@@@@@@@@")
             if let item = self.findSectionItem(with: text) {
                 let MemoWriteVC = MemoWriteViewController()
                 if let presentationController = MemoWriteVC.presentationController as? UISheetPresentationController {
@@ -148,11 +151,17 @@ extension MemoListViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         let deleteAction = UIContextualAction(style: .destructive, title: "Delete") {  [weak self] (_, _, completionHandler) in
             guard let self = self else { return }
-            let category = categories[indexPath.section]
-            let sectionItem = category.items[indexPath.row]
-            instance.deleteData(category: category.name, content: sectionItem.memoText)
-            tableView.reloadData()
-            completionHandler(true)
+            
+            DispatchQueue.main.async{ [weak self] in
+                guard let self = self else {return }
+                let category = self.categories[indexPath.section]
+                let sectionItem = category.items[indexPath.row]
+                instance.deleteData(category: category.name, content: sectionItem.memoText)
+                categories = instance.getCategoriesFromUserDefaults()
+                tableView.reloadData()
+                completionHandler(true)
+                
+            }
         }
         deleteAction.image = UIImage(systemName: "trash")
         return UISwipeActionsConfiguration(actions: [deleteAction])
@@ -168,27 +177,27 @@ class MemoListViewController : UIViewController{
         tableView.dataSource = self
         return tableView
     }()
-    
-    let total = categories.reduce(0) { (count, category) in
-        let categoryCount = category.items.reduce(0) { (itemCount, sectionItem) in
-            return itemCount + (sectionItem.isSwitchOn ? 1 : 0)
-        }
-        return count + categoryCount
-    }
-    
     let instance = LocalDBManager.instance
-    var uncompletedItemListCount = categories.reduce(0) { (count, category) in
-        let categoryCount = category.items.reduce(0) { (itemCount, sectionItem) in
-            return itemCount + (sectionItem.isSwitchOn == false  ? 1 : 0)
-        }
-        return count + categoryCount
-    }
+    var uncompletedItemListCount = 0
+    
+    var categories : [Category] = []
     override func viewDidLoad() {
         super.viewDidLoad()
+    
+        categories = instance.getCategoriesFromUserDefaults()
+        print(categories)
+        uncompletedItemListCount = categories.reduce(0) { (count, category) in
+            let categoryCount = category.items.reduce(0) { (itemCount, sectionItem) in
+                return itemCount + (sectionItem.isSwitchOn == false  ? 1 : 0)
+            }
+            return count + categoryCount
+        }
+
         setupNavigationBar()
         setupSubviews()
         setupLayout()
         setupTableFHView()
+
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(DidReceiveTextChangeCommitStatus),
@@ -200,12 +209,12 @@ class MemoListViewController : UIViewController{
         if let status = notification.object as? TextChangeCommitStatus {
             if status == .Success
             {
-                Toast.showToast(message: "요청이 성공적으로 처리되었습니다.", errorMessage: [], font: UIFont.systemFont(ofSize: 14.0), controllerView: self)
+                //Toast.showToast(message: "요청이 성공적으로 처리되었습니다.", errorMessage: [], font: UIFont.systemFont(ofSize: 14.0), controllerView: self)
+                categories = instance.getCategoriesFromUserDefaults()
                 tableView.reloadData()
             }
         }
     }
-    
     
     func setupTableFHView(){
         //테이블뷰 헤더
@@ -224,6 +233,7 @@ class MemoListViewController : UIViewController{
         tableViewFooter.backgroundColor = .gray
         let footerLabel = UILabel()
         footerLabel.setupCustomLabelFont(text: "총 \(uncompletedItemListCount)개 항목이 완료되지 않았습니다.", isBold: true, textSize: 20)
+        print(uncompletedItemListCount)
         footerLabel.sizeToFit()
         footerLabel.center.x = tableViewFooter.center.x
         footerLabel.center.y = tableViewFooter.frame.size.height / 2
