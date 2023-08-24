@@ -6,24 +6,11 @@
 //
 
 import Foundation
-struct Memo {
-    var content: String
-    var insertDate: Date
-    var switchIsOn: Bool
-     init() {
-        self.content = ""
-        self.insertDate = Date()
-        self.switchIsOn = false
-
-    }
-
-    init(content: String, insertDate: Date = Date(), switchIsOn: Bool) {
-        self.content = content
-        self.insertDate = insertDate
-        self.switchIsOn = switchIsOn
-    }
-
-    init(updatedContent: String, switchIsOn: Bool) {
-        self.init(content: updatedContent, switchIsOn: switchIsOn)
-    }
+struct Category :  Codable {
+    var name: String
+    var items: [SectionItem]
+}
+struct SectionItem  : Codable{
+    var memoText: String
+    var isSwitchOn: Bool
 }

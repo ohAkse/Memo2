@@ -16,7 +16,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else {return}
         window = UIWindow(windowScene: windowScene)
         let memoHomeVC = MemoHomeViewController()
-        window?.rootViewController = memoHomeVC
+        let navigationController = UINavigationController(rootViewController: memoHomeVC)
+        window?.rootViewController = navigationController
+        window?.backgroundColor = UIColor.white
         window?.makeKeyAndVisible()
     }
 
