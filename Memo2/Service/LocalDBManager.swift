@@ -11,7 +11,6 @@ class LocalDBManager{
     static let instance = LocalDBManager()
     func createData(category: String, item: SectionItem) {
         var categories = getCategoriesFromUserDefaults()
-        print(categories)
         if let index = categories.firstIndex(where: { $0.name == category }) {
             categories[index].items.append(item)
             saveCategoriesToUserDefaults(categories)
@@ -78,7 +77,7 @@ class LocalDBManager{
             }
         }
     }
-    
+    //테이블뷰 셀 옆으로 슬라이딩을 끝까지 하거나 혹은 삭제버튼 눌렀을때
     func deleteData(category: String, content: String) {
         var updatedCategories = getCategoriesFromUserDefaults()
         if let categoryIndex = updatedCategories.firstIndex(where: { $0.name == category }) {

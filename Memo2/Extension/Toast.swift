@@ -7,7 +7,7 @@
 import UIKit
 class Toast{
     static func showToast(message : String, errorMessage : [String], font: UIFont, controllerView : UIViewController) {
-        let toastLabel = UILabel(frame: CGRect(x: /*controllerView.view.frame.size.width/2 - 10*/ 20 , y: controllerView.view.frame.size.height-150, width: UIScreen.main.bounds.width-20, height: 35))
+        let toastLabel = UILabel(frame: CGRect(x: /*controllerView.view.frame.size.width/2 - 10*/ 20 , y: controllerView.view.frame.size.height-70, width: UIScreen.main.bounds.width-20, height: 35))
         toastLabel.backgroundColor = UIColor.black.withAlphaComponent(0.6)
         toastLabel.textColor = UIColor.white
         if (errorMessage.isEmpty) {

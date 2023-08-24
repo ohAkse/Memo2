@@ -42,13 +42,15 @@ class MemoCategoryViewController : UIViewController
     deinit{
         print("MemoCategoryViewController deinit called")
     }
-
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(true)
+        
+    }
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
         setupSubviews()
         setupLayout()
-
     }
     func setupSubviews(){
         view.addSubview(titleLabel)
@@ -58,69 +60,53 @@ class MemoCategoryViewController : UIViewController
     }
     func setupLayout() {
         titleLabel.snp.makeConstraints { make in
-            make.centerX.equalToSuperview() // 수평 가운데 정렬
+            make.centerX.equalToSuperview()
             make.top.equalTo(view.safeAreaLayoutGuide.snp.top)
             make.width.equalTo(200)
             make.height.equalTo(70)
         }
 
         workoutButton.snp.makeConstraints { make in
-            make.centerX.equalToSuperview() // 수평 가운데 정렬
+            make.centerX.equalToSuperview()
             make.top.equalTo(titleLabel.snp.bottom).offset(10)
-            make.width.equalTo(200)
+            make.width.equalToSuperview().multipliedBy(0.6)
             make.height.equalTo(90)
         }
 
         studytButton.snp.makeConstraints { make in
-            make.centerX.equalToSuperview() // 수평 가운데 정렬
+            make.centerX.equalToSuperview() 
             make.top.equalTo(workoutButton.snp.bottom).offset(30)
-            make.width.equalTo(200)
+            make.width.equalTo(workoutButton.snp.width)
             make.height.equalTo(90)
         }
 
         meetingButton.snp.makeConstraints { make in
-            make.centerX.equalToSuperview() // 수평 가운데 정렬
+            make.centerX.equalToSuperview()
             make.top.equalTo(studytButton.snp.bottom).offset(30)
-            make.width.equalTo(200)
+            make.width.equalTo(workoutButton.snp.width)
             make.height.equalTo(90)
         }
     }
-
-    @objc func workoutButtonTapped(){
-        let MemoWriteVC = MemoWriteViewController()
-        if let presentationController = MemoWriteVC.presentationController as? UISheetPresentationController {
+    func moveMemoWriteViewController(categoryType : CategoryType)
+    {
+        let memoWriteVC = MemoWriteViewController()
+        if let presentationController = memoWriteVC.presentationController as? UISheetPresentationController {
             presentationController.detents = [
                 .medium(),
             ]
-            presentationController.prefersGrabberVisible = true
         }
-        MemoWriteVC.titleLabel.text = UISheetPaperType.create.typeValue
-        MemoWriteVC.category = CategoryType.workout.typeValue
-        self.present(MemoWriteVC, animated: true)
+        memoWriteVC.titleLabel.text = UISheetPaperType.create.typeValue
+        memoWriteVC.category = categoryType.typeValue
+        self.present(memoWriteVC, animated: true)
+    }
+    @objc func workoutButtonTapped(){
+        moveMemoWriteViewController(categoryType: .workout)
     }
     @objc func studytButtonTapped(){
-        let MemoWriteVC = MemoWriteViewController()
-        if let presentationController = MemoWriteVC.presentationController as? UISheetPresentationController {
-            presentationController.detents = [
-                .medium(),
-            ]
-            presentationController.prefersGrabberVisible = true
-        }
-        MemoWriteVC.titleLabel.text = UISheetPaperType.create.typeValue
-        MemoWriteVC.category = CategoryType.study.typeValue
-        self.present(MemoWriteVC, animated: true)
+        moveMemoWriteViewController(categoryType: .study)
     }
     @objc func meetingButtonTapped(){
-        let MemoWriteVC = MemoWriteViewController()
-        if let presentationController = MemoWriteVC.presentationController as? UISheetPresentationController {
-            presentationController.detents = [
-                .medium(),
-            ]
-            presentationController.prefersGrabberVisible = true
-        }
-        MemoWriteVC.titleLabel.text = UISheetPaperType.create.typeValue
-        MemoWriteVC.category = CategoryType.meeting.typeValue
-        self.present(MemoWriteVC, animated: true)
+        moveMemoWriteViewController(categoryType: .meeting)
     }
 }
 
