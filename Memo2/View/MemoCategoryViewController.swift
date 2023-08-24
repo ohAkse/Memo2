@@ -90,37 +90,37 @@ class MemoCategoryViewController : UIViewController
     }
 
     @objc func workoutButtonTapped(){
-        let MemoWriteVC = MemoWriteViewController()
-        if let presentationController = MemoWriteVC.presentationController as? UISheetPresentationController {
+        let memoWriteVC = MemoWriteViewController()
+        if let presentationController = memoWriteVC.presentationController as? UISheetPresentationController {
             presentationController.detents = [
                 .medium(),
             ]
         }
-        MemoWriteVC.titleLabel.text = UISheetPaperType.create.typeValue
-        MemoWriteVC.category = CategoryType.workout.typeValue
-        self.present(MemoWriteVC, animated: true)
+        memoWriteVC.titleLabel.text = UISheetPaperType.create.typeValue
+        memoWriteVC.category = CategoryType.workout.typeValue
+        self.present(memoWriteVC, animated: true)
     }
     @objc func studytButtonTapped(){
-        let MemoWriteVC = MemoWriteViewController()
-        if let presentationController = MemoWriteVC.presentationController as? UISheetPresentationController {
+        let memoWriteVC = MemoWriteViewController()
+        if let presentationController = memoWriteVC.presentationController as? UISheetPresentationController {
             presentationController.detents = [
                 .medium(),
             ]
         }
-        MemoWriteVC.titleLabel.text = UISheetPaperType.create.typeValue
-        MemoWriteVC.category = CategoryType.study.typeValue
-        self.present(MemoWriteVC, animated: true)
+        memoWriteVC.titleLabel.text = UISheetPaperType.create.typeValue
+        memoWriteVC.category = CategoryType.study.typeValue
+        self.present(memoWriteVC, animated: true)
     }
     @objc func meetingButtonTapped(){
-        let MemoWriteVC = MemoWriteViewController()
-        if let presentationController = MemoWriteVC.presentationController as? UISheetPresentationController {
+        let memoWriteVC = MemoWriteViewController()
+        if let presentationController = memoWriteVC.presentationController as? UISheetPresentationController {
             presentationController.detents = [
                 .medium(),
             ]
         }
-        MemoWriteVC.titleLabel.text = UISheetPaperType.create.typeValue
-        MemoWriteVC.category = CategoryType.meeting.typeValue
-        self.present(MemoWriteVC, animated: true)
+        memoWriteVC.titleLabel.text = UISheetPaperType.create.typeValue
+        memoWriteVC.category = CategoryType.meeting.typeValue
+        self.present(memoWriteVC, animated: true)
     }
 }
 

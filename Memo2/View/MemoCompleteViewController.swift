@@ -12,19 +12,17 @@ extension MemoCompleteViewController: UITableViewDelegate, UITableViewDataSource
         return filterData.count
     }
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        
-        if let cell = tableView.dequeueReusableCell(withIdentifier: "TodoListCell") as? TodoListCell {
-            cell.selectionStyle = .none
-            cell.textView.text = filterData[indexPath.row].memoText
-            cell.textView.isUserInteractionEnabled = false
-            cell.switchButton.isHidden = true
-            return cell
-        }else{
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "TodoListCell") as? TodoListCell else {
             return UITableViewCell()
         }
+        cell.selectionStyle = .none
+        cell.textView.text = filterData[indexPath.row].memoText
+        cell.textView.isUserInteractionEnabled = false
+        cell.switchButton.isHidden = true
+        return cell
     }
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 70
+        return cellHeight
     }
 }
 class MemoCompleteViewController : UIViewController{
@@ -83,28 +81,31 @@ class MemoCompleteViewController : UIViewController{
         setupCategoryMenu()
         
     }
+    func filterAndReloadData(for category: CategoryType) {
+        filterData = instance.readCompleteData(category: category).filter { $0.isSwitchOn == true }
+        tableView.reloadData()
+    }
     func setupCategoryMenu(){
         var menuItems: [UIMenuElement] = []
+
+        
         menuItems.append(UIAction(title: CategoryType.workout.typeValue, image: UIImage(systemName: "figure.walk")) { [weak self] _ in
             guard let self = self else {
                 return
             }
-            filterData = instance.readCompleteData(category: .workout).filter{$0.isSwitchOn == true}
-            tableView.reloadData()
+            filterAndReloadData(for: .workout)
         })
         menuItems.append(UIAction(title: CategoryType.study.typeValue, image: UIImage(systemName: "sum")) { [weak self] _ in
             guard let self = self else {
                 return
             }
-            filterData = instance.readCompleteData(category: .study).filter{$0.isSwitchOn == true}
-            tableView.reloadData()
+            filterAndReloadData(for: .study)
         })
         menuItems.append(UIAction(title: CategoryType.meeting.typeValue, image: UIImage(systemName: "person.3.sequence.fill")) { [weak self] _ in
             guard let self = self else {
                 return
             }
-            filterData = instance.readCompleteData(category: .meeting).filter{$0.isSwitchOn == true}
-            tableView.reloadData()
+            filterAndReloadData(for: .meeting)
         })
         let menu = UIMenu(title: "", children: menuItems)
         self.categoryMenu = menu

@@ -11,22 +11,18 @@ extension MemoListViewController: UITableViewDelegate, UITableViewDataSource {
     private func createSectionHeaderView(title: String) -> UIView {
         let headerView = UIView()
         headerView.backgroundColor = .lightGray
-        
         let headerLabel = UILabel()
         headerLabel.setupCustomLabelFont(text: title, isBold: false, textSize: 20)
         headerLabel.frame = CGRect(x: 20, y: (((footerHeight) / 2) - headerLabel.frame.size.height) / 2, width: tableView.bounds.width, height: headerLabel.intrinsicContentSize.height)
-        
         headerView.addSubview(headerLabel)
         return headerView
     }
     
     private func createSectionFooterView(text: String) -> UIView {
         let footerView = UIView()
-        
         let footerLabel = UILabel()
         footerLabel.setupCustomLabelFont(text: text, isBold: false, textSize: 20)
         footerLabel.frame = CGRect(x: 20, y: (((footerHeight) / 2) - footerLabel.frame.size.height) / 2, width: tableView.bounds.width, height: footerLabel.intrinsicContentSize.height)
-        
         footerView.addSubview(footerLabel)
         return footerView
     }
@@ -59,7 +55,6 @@ extension MemoListViewController: UITableViewDelegate, UITableViewDataSource {
         let category = categories[section]
         return createSectionHeaderView(title: category.name)
     }
-    
     ///MARK : 섹션 푸터
     func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
         return headerHeight
@@ -88,30 +83,22 @@ extension MemoListViewController: UITableViewDelegate, UITableViewDataSource {
         cell.textView.text = sectionItem.memoText
         cell.switchButton.isOn = sectionItem.isSwitchOn
         
-        var attributes: [NSAttributedString.Key: Any] = [
-            .font: UIFont.systemFont(ofSize: cellFontSize)
-        ]
-        
-        if cell.switchButton.isOn {
-            attributes[.strikethroughStyle] = NSUnderlineStyle.single.rawValue
-        }
-        
         configureTextView(for: cell.textView, with: sectionItem.memoText, isSwitchOn: cell.switchButton.isOn)
         
         cell.switchButtonAction = { [weak self] in
             guard let self = self else { return }
+           
             instance.updateData(category: category.name, cellIndex: indexPath.row, content: sectionItem.memoText, isSwitchOn: cell.switchButton.isOn)
             configureTextView(for: cell.textView, with: sectionItem.memoText, isSwitchOn: cell.switchButton.isOn)
             updateFooterLabel(with: uncompletedItemListCount, isOn : cell.switchButton.isOn)
-            categories = instance.getCategoriesFromUserDefaults()
-            tableView.reloadData()
+            updateUI()
         }
         
         cell.contentTextFieldAction = { [weak self] in
             guard let self = self, let text = cell.textView.text else { return }
+            
             if self.presentedViewController != nil { return }
             if let item = self.findSectionItem(with: text) {
-                
                 let memoWriteVC = MemoWriteViewController()
                 if let presentationController = memoWriteVC.presentationController as? UISheetPresentationController {
                     presentationController.detents = [.medium()]
@@ -136,17 +123,17 @@ extension MemoListViewController: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 70
+        return cellHeight
     }
     //MARK : 스와이프시 삭제
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         let deleteAction = UIContextualAction(style: .destructive, title: "Delete") {  [weak self] (_, _, completionHandler) in
             guard let self = self else { return }
-            let category = self.categories[indexPath.section]
+            
+            let category = categories[indexPath.section]
             let sectionItem = category.items[indexPath.row]
             instance.deleteData(category: category.name, content: sectionItem.memoText)
-            categories = instance.getCategoriesFromUserDefaults()
-            tableView.reloadData()
+            updateUI()
             completionHandler(true)
         }
         deleteAction.image = UIImage(systemName: "trash")
@@ -154,6 +141,7 @@ extension MemoListViewController: UITableViewDelegate, UITableViewDataSource {
     }
 }
 class MemoListViewController : UIViewController{
+    //컴포넌트
     lazy var tableView : UITableView = {
         let tableView = UITableView(frame: .zero, style: .grouped)
         tableView.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
@@ -163,24 +151,17 @@ class MemoListViewController : UIViewController{
         tableView.dataSource = self
         return tableView
     }()
-    let instance = LocalDBManager.instance
-    var uncompletedItemListCount = 0
-    var categories : [Category] = []
     
+    //프로퍼티
+    private let instance = LocalDBManager.instance
+    private var uncompletedItemListCount = 0
+    private var categories : [Category] = []
     deinit{
         print("MemoListViewController deinit called")
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(true)
-        instance.initializeCategoriesIfNeeded()
-        categories = instance.getCategoriesFromUserDefaults()
-        uncompletedItemListCount = categories.reduce(0) { (count, category) in
-            let categoryCount = category.items.reduce(0) { (itemCount, sectionItem) in
-                return itemCount + (sectionItem.isSwitchOn == true ? 0 : 1)
-            }
-            return count + categoryCount
-        }
     }
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(true)
@@ -188,6 +169,7 @@ class MemoListViewController : UIViewController{
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        InitLocalDBData()
         setupNavigationBar()
         setupSubviews()
         setupLayout()
@@ -206,10 +188,24 @@ class MemoListViewController : UIViewController{
             {
                 Toast.showToast(message: "요청이 성공적으로 처리되었습니다.", errorMessage: [], font: UIFont.systemFont(ofSize: 14.0), controllerView: self)
                 updateFooterLabel(with: uncompletedItemListCount, isOn: false)
-                categories = instance.getCategoriesFromUserDefaults()
-                tableView.reloadData()
+                updateUI()
             }
         }
+    }
+    func InitLocalDBData(){
+        instance.initializeCategoriesIfNeeded()
+        categories = instance.getCategoriesFromUserDefaults()
+        uncompletedItemListCount = categories.reduce(0) { (count, category) in
+            let categoryCount = category.items.reduce(0) { (itemCount, sectionItem) in
+                return itemCount + (sectionItem.isSwitchOn == true ? 0 : 1)
+            }
+            return count + categoryCount
+        }
+    }
+    
+    func updateUI(){
+        categories = instance.getCategoriesFromUserDefaults()
+        tableView.reloadData()
     }
     
     func setupTableFHView(){

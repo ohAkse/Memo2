@@ -47,7 +47,7 @@ class MemoWriteViewController : UIViewController, UITextViewDelegate
         view.backgroundColor = .white
         setupSubviews()
         setupLayout()
-        originText = textContent.text//나중에 기존 textContent기준으로 된거 오리진으로 일단 처리할것.
+        originText = textContent.text
     }
     
     func setupSubviews(){
@@ -58,13 +58,13 @@ class MemoWriteViewController : UIViewController, UITextViewDelegate
     
     func setupLayout() {
         titleLabel.snp.makeConstraints { make in
-            make.centerX.equalToSuperview() // 수평 가운데 정렬
+            make.centerX.equalToSuperview()
             make.top.equalTo(view.safeAreaLayoutGuide.snp.top)
             make.width.equalTo(200)
             make.height.equalTo(100)
         }
         textContent.snp.makeConstraints { make in
-            make.centerX.equalToSuperview() // 수평 가운데 정렬
+            make.centerX.equalToSuperview()
             make.top.equalTo(titleLabel.snp.bottom)
             make.leading.equalTo(view.safeAreaLayoutGuide.snp.leading).offset(20)
             make.trailing.equalTo(view.safeAreaLayoutGuide.snp.trailing).offset(-20)
@@ -78,20 +78,20 @@ class MemoWriteViewController : UIViewController, UITextViewDelegate
         }
        
     }
-    @objc func confirmButtonTapped(){
-        if textContent.text != ""{
-            if titleLabel.text == UISheetPaperType.update.typeValue{
-                if let item = selectedItem{
-                    instance.updateData(category: category, originText: originText, changeText: textContent.text)
-                    self.dismiss(animated: true)
-                }
-            }else{
-                instance.createData(category: category, item: SectionItem(memoText: textContent.text, isSwitchOn: false))
-                self.presentingViewController?.presentingViewController?.dismiss(animated: true, completion: nil)
-            }
-            NotificationCenter.default.post(name: .textChangeStatus, object: TextChangeCommitStatus.Success)
-        }else{
-            self.showAlert(title: "에러", message: "내용을 추가해주세요")
+    @objc func confirmButtonTapped() {
+        guard let text = textContent.text, !text.isEmpty else {
+            showAlert(title: "에러", message: "내용을 추가해주세요")
+            return
         }
+        
+        if titleLabel.text == UISheetPaperType.update.typeValue {
+            instance.updateData(category: category, originText: originText, changeText: text)
+            self.dismiss(animated: true)
+        } else {
+            instance.createData(category: category, item: SectionItem(memoText: text, isSwitchOn: false))
+            presentingViewController?.presentingViewController?.dismiss(animated: true, completion: nil)
+        }
+        
+        NotificationCenter.default.post(name: .textChangeStatus, object: TextChangeCommitStatus.Success)
     }
 }
