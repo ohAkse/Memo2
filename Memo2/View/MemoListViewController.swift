@@ -111,16 +111,17 @@ extension MemoListViewController: UITableViewDelegate, UITableViewDataSource {
             guard let self = self, let text = cell.textView.text else { return }
             if self.presentedViewController != nil { return }
             if let item = self.findSectionItem(with: text) {
-                let MemoWriteVC = MemoWriteViewController()
-                if let presentationController = MemoWriteVC.presentationController as? UISheetPresentationController {
+                
+                let memoWriteVC = MemoWriteViewController()
+                if let presentationController = memoWriteVC.presentationController as? UISheetPresentationController {
                     presentationController.detents = [.medium()]
-                    presentationController.prefersGrabberVisible = true
                 }
-                MemoWriteVC.titleLabel.text = UISheetPaperType.update.typeValue
-                MemoWriteVC.category = item.category
-                MemoWriteVC.selectedItem = item.item
-                MemoWriteVC.textContent.text = text
-                self.present(MemoWriteVC, animated: true)
+                memoWriteVC.titleLabel.text = UISheetPaperType.update.typeValue
+                memoWriteVC.category = item.category
+                memoWriteVC.selectedItem = item.item
+                memoWriteVC.textContent.text = text
+                self.present(memoWriteVC, animated: true)
+                
             }
         }
         return cell
@@ -244,8 +245,9 @@ class MemoListViewController : UIViewController{
             presentationController.detents = [
                 .medium(),
             ]
-            presentationController.prefersGrabberVisible = true
+            //presentationController.prefersGrabberVisible = true 강한참조원인이나 명확히 알수없음 일단 제거
         }
+
         self.present(MemoCategoryVC, animated: true)
     }
     func setupSubviews(){
