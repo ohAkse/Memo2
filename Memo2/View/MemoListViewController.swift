@@ -6,9 +6,6 @@
 //
 
 import UIKit
-let footerHeight = 40.0
-let headerHeight = 40.0
-let cellFontSize = 24.0
 extension MemoListViewController: UITableViewDelegate, UITableViewDataSource {
     ///MARK : 커스텀 함수
     private func createSectionHeaderView(title: String) -> UIView {
@@ -42,7 +39,6 @@ extension MemoListViewController: UITableViewDelegate, UITableViewDataSource {
         }
         return nil
     }
-    
     func configureTextView(for textView: UITextView, with text: String, isSwitchOn: Bool) {
         var attributes: [NSAttributedString.Key: Any] = [:]
         attributes[.font] = UIFont.systemFont(ofSize: cellFontSize)
@@ -56,14 +52,14 @@ extension MemoListViewController: UITableViewDelegate, UITableViewDataSource {
     
     ///MARK : 섹션 헤더
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        return footerHeight // 원하는 높이로 설정
+        return footerHeight
     }
     
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let category = categories[section]
         return createSectionHeaderView(title: category.name)
     }
-
+    
     ///MARK : 섹션 푸터
     func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
         return headerHeight
@@ -86,40 +82,34 @@ extension MemoListViewController: UITableViewDelegate, UITableViewDataSource {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "TodoListCell") as? TodoListCell else {
             return UITableViewCell()
         }
-        
         let category = categories[indexPath.section]
         let sectionItem = category.items[indexPath.row]
-
+        
         cell.textView.text = sectionItem.memoText
         cell.switchButton.isOn = sectionItem.isSwitchOn
-
+        
         var attributes: [NSAttributedString.Key: Any] = [
             .font: UIFont.systemFont(ofSize: cellFontSize)
         ]
-
+        
         if cell.switchButton.isOn {
             attributes[.strikethroughStyle] = NSUnderlineStyle.single.rawValue
         }
-
+        
         configureTextView(for: cell.textView, with: sectionItem.memoText, isSwitchOn: cell.switchButton.isOn)
         
         cell.switchButtonAction = { [weak self] in
             guard let self = self else { return }
-            DispatchQueue.main.async{ [weak self] in
-                guard let self = self else { return }
-                instance.updateData(category: category.name, cellIndex: indexPath.row, content: sectionItem.memoText, isSwitchOn: cell.switchButton.isOn)
-                configureTextView(for: cell.textView, with: sectionItem.memoText, isSwitchOn: cell.switchButton.isOn)
-                updateFooterLabel(with: uncompletedItemListCount, isOn : cell.switchButton.isOn)
-                categories = instance.getCategoriesFromUserDefaults()
-                tableView.reloadData()
-            }
-            
+            instance.updateData(category: category.name, cellIndex: indexPath.row, content: sectionItem.memoText, isSwitchOn: cell.switchButton.isOn)
+            configureTextView(for: cell.textView, with: sectionItem.memoText, isSwitchOn: cell.switchButton.isOn)
+            updateFooterLabel(with: uncompletedItemListCount, isOn : cell.switchButton.isOn)
+            categories = instance.getCategoriesFromUserDefaults()
+            tableView.reloadData()
         }
         
         cell.contentTextFieldAction = { [weak self] in
             guard let self = self, let text = cell.textView.text else { return }
             if self.presentedViewController != nil { return }
-            print("contentText button@@@@@@@@@@@@@@")
             if let item = self.findSectionItem(with: text) {
                 let MemoWriteVC = MemoWriteViewController()
                 if let presentationController = MemoWriteVC.presentationController as? UISheetPresentationController {
@@ -143,7 +133,7 @@ extension MemoListViewController: UITableViewDelegate, UITableViewDataSource {
             footerLabel.sizeToFit()
         }
     }
- 
+    
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 70
     }
@@ -151,17 +141,12 @@ extension MemoListViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         let deleteAction = UIContextualAction(style: .destructive, title: "Delete") {  [weak self] (_, _, completionHandler) in
             guard let self = self else { return }
-            
-            DispatchQueue.main.async{ [weak self] in
-                guard let self = self else {return }
-                let category = self.categories[indexPath.section]
-                let sectionItem = category.items[indexPath.row]
-                instance.deleteData(category: category.name, content: sectionItem.memoText)
-                categories = instance.getCategoriesFromUserDefaults()
-                tableView.reloadData()
-                completionHandler(true)
-                
-            }
+            let category = self.categories[indexPath.section]
+            let sectionItem = category.items[indexPath.row]
+            instance.deleteData(category: category.name, content: sectionItem.memoText)
+            categories = instance.getCategoriesFromUserDefaults()
+            tableView.reloadData()
+            completionHandler(true)
         }
         deleteAction.image = UIImage(systemName: "trash")
         return UISwipeActionsConfiguration(actions: [deleteAction])
@@ -179,25 +164,33 @@ class MemoListViewController : UIViewController{
     }()
     let instance = LocalDBManager.instance
     var uncompletedItemListCount = 0
-    
     var categories : [Category] = []
-    override func viewDidLoad() {
-        super.viewDidLoad()
     
+    deinit{
+        print("MemoListViewController deinit called")
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(true)
+        instance.initializeCategoriesIfNeeded()
         categories = instance.getCategoriesFromUserDefaults()
-        print(categories)
         uncompletedItemListCount = categories.reduce(0) { (count, category) in
             let categoryCount = category.items.reduce(0) { (itemCount, sectionItem) in
-                return itemCount + (sectionItem.isSwitchOn == false  ? 1 : 0)
+                return itemCount + (sectionItem.isSwitchOn == true ? 0 : 1)
             }
             return count + categoryCount
         }
-
+    }
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(true)
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
         setupNavigationBar()
         setupSubviews()
         setupLayout()
         setupTableFHView()
-
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(DidReceiveTextChangeCommitStatus),
@@ -205,11 +198,13 @@ class MemoListViewController : UIViewController{
             object: nil
         )
     }
+    
     @objc func DidReceiveTextChangeCommitStatus(_ notification: Notification) {
         if let status = notification.object as? TextChangeCommitStatus {
             if status == .Success
             {
-                //Toast.showToast(message: "요청이 성공적으로 처리되었습니다.", errorMessage: [], font: UIFont.systemFont(ofSize: 14.0), controllerView: self)
+                Toast.showToast(message: "요청이 성공적으로 처리되었습니다.", errorMessage: [], font: UIFont.systemFont(ofSize: 14.0), controllerView: self)
+                updateFooterLabel(with: uncompletedItemListCount, isOn: false)
                 categories = instance.getCategoriesFromUserDefaults()
                 tableView.reloadData()
             }
@@ -233,7 +228,6 @@ class MemoListViewController : UIViewController{
         tableViewFooter.backgroundColor = .gray
         let footerLabel = UILabel()
         footerLabel.setupCustomLabelFont(text: "총 \(uncompletedItemListCount)개 항목이 완료되지 않았습니다.", isBold: true, textSize: 20)
-        print(uncompletedItemListCount)
         footerLabel.sizeToFit()
         footerLabel.center.x = tableViewFooter.center.x
         footerLabel.center.y = tableViewFooter.frame.size.height / 2

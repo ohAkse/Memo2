@@ -35,13 +35,16 @@ class MemoWriteViewController : UIViewController, UITextViewDelegate
     var originText : String = ""
     let instance = LocalDBManager.instance
     var selectedItem : SectionItem?
+    
+    deinit{
+        print("MemoWriteViewController deinit called")
+    }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(true)
     }
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
-        print(category)
         setupSubviews()
         setupLayout()
         originText = textContent.text//나중에 기존 textContent기준으로 된거 오리진으로 일단 처리할것.
@@ -73,6 +76,7 @@ class MemoWriteViewController : UIViewController, UITextViewDelegate
             make.height.equalTo(50)
             make.width.equalTo(100)
         }
+       
     }
     @objc func confirmButtonTapped(){
         if textContent.text != ""{
@@ -85,7 +89,6 @@ class MemoWriteViewController : UIViewController, UITextViewDelegate
                 instance.createData(category: category, item: SectionItem(memoText: textContent.text, isSwitchOn: false))
                 self.presentingViewController?.presentingViewController?.dismiss(animated: true, completion: nil)
             }
-            
             NotificationCenter.default.post(name: .textChangeStatus, object: TextChangeCommitStatus.Success)
         }else{
             self.showAlert(title: "에러", message: "내용을 추가해주세요")

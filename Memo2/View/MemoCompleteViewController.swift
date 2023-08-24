@@ -8,22 +8,20 @@
 import UIKit
 
 extension MemoCompleteViewController: UITableViewDelegate, UITableViewDataSource {
-    
-    ///MARK : 셀 관련
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return filterData.count
     }
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-                if let cell = tableView.dequeueReusableCell(withIdentifier: "TodoListCell") as? TodoListCell {
-                    cell.selectionStyle = .none
-                    cell.textView.text = filterData[indexPath.row].memoText
-                    cell.textView.isUserInteractionEnabled = false
-                    cell.switchButton.isHidden = true
-                    return cell
-                }else{
-                    return UITableViewCell()
-                }
+        if let cell = tableView.dequeueReusableCell(withIdentifier: "TodoListCell") as? TodoListCell {
+            cell.selectionStyle = .none
+            cell.textView.text = filterData[indexPath.row].memoText
+            cell.textView.isUserInteractionEnabled = false
+            cell.switchButton.isHidden = true
+            return cell
+        }else{
+            return UITableViewCell()
+        }
     }
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 70
@@ -67,7 +65,15 @@ class MemoCompleteViewController : UIViewController{
     var category : String = ""
     let instance = LocalDBManager.instance
     var filterData : [SectionItem] = []
-
+    
+    deinit{
+        print("MemoCompleteViewController deinit called")
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(true)
+        filterData = instance.readCompleteData(category: .workout).filter{$0.isSwitchOn == true} //초기데이터 설정
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -76,33 +82,29 @@ class MemoCompleteViewController : UIViewController{
         setupLayout()
         setupCategoryMenu()
         
-
-        filterData = instance.readData(category: .workout).filter{$0.isSwitchOn == true} //초기데이터 설정
     }
     func setupCategoryMenu(){
         var menuItems: [UIMenuElement] = []
-        menuItems.append(UIAction(title: CategoryType.workout.typeValue, image: UIImage(systemName: "pencil")) { [weak self] _ in
+        menuItems.append(UIAction(title: CategoryType.workout.typeValue, image: UIImage(systemName: "figure.walk")) { [weak self] _ in
             guard let self = self else {
                 return
             }
-            filterData = instance.readData(category: .workout).filter{$0.isSwitchOn == true}
-            tableView.reloadData()
-            print("운동 테이블뷰에..")
-        })
-        menuItems.append(UIAction(title: CategoryType.study.typeValue, image: UIImage(systemName: "pencil")) { [weak self] _ in
-            guard let self = self else {
-                return
-            }
-            filterData = instance.readData(category: .study).filter{$0.isSwitchOn == true}
+            filterData = instance.readCompleteData(category: .workout).filter{$0.isSwitchOn == true}
             tableView.reloadData()
         })
-        menuItems.append(UIAction(title: CategoryType.meeting.typeValue, image: UIImage(systemName: "pencil")) { [weak self] _ in
+        menuItems.append(UIAction(title: CategoryType.study.typeValue, image: UIImage(systemName: "sum")) { [weak self] _ in
             guard let self = self else {
                 return
             }
-            filterData = instance.readData(category: .meeting).filter{$0.isSwitchOn == true}
+            filterData = instance.readCompleteData(category: .study).filter{$0.isSwitchOn == true}
             tableView.reloadData()
-            print("모인 테이블뷰에..")
+        })
+        menuItems.append(UIAction(title: CategoryType.meeting.typeValue, image: UIImage(systemName: "person.3.sequence.fill")) { [weak self] _ in
+            guard let self = self else {
+                return
+            }
+            filterData = instance.readCompleteData(category: .meeting).filter{$0.isSwitchOn == true}
+            tableView.reloadData()
         })
         let menu = UIMenu(title: "", children: menuItems)
         self.categoryMenu = menu

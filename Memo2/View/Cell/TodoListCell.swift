@@ -7,6 +7,11 @@
 
 import UIKit
 
+let footerHeight = 40.0
+let headerHeight = 40.0
+let cellFontSize = 24.0
+let cellHeight = 70.0
+
 class TodoListCell : UITableViewCell, UITextViewDelegate{
     lazy var textView: UITextView = {
         let textView = UITextView()

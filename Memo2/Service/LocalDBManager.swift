@@ -14,7 +14,6 @@ class LocalDBManager{
         print(categories)
         if let index = categories.firstIndex(where: { $0.name == category }) {
             categories[index].items.append(item)
-         
             saveCategoriesToUserDefaults(categories)
         } else {
             print("Category not found: \(category)")
@@ -32,11 +31,9 @@ class LocalDBManager{
 
     func saveCategoriesToUserDefaults(_ categories: [Category]) {
         do {
-            print("*****************saveCategoriesToUserDefaults**************")
-            print(categories)
             let data = try JSONEncoder().encode(categories)
-            UserDefaults.standard.set(data, forKey: "categories")
-          
+            UserDefaults.standard.setValue(data, forKey: "categories")
+            
         } catch {
             print("Error encoding categories: \(error)")
         }
@@ -77,7 +74,6 @@ class LocalDBManager{
             if cellIndex < updatedCategories[categoryIndex].items.count {
                 updatedCategories[categoryIndex].items[cellIndex].memoText = content
                 updatedCategories[categoryIndex].items[cellIndex].isSwitchOn = isSwitchOn
-                print(updatedCategories)
                 saveCategoriesToUserDefaults(updatedCategories)
             }
         }
@@ -90,8 +86,8 @@ class LocalDBManager{
             saveCategoriesToUserDefaults(updatedCategories)
         }
     }
-
-    func readData(category: CategoryType) -> [SectionItem] {
+    //완료 리스트에 카테고리별 읽기
+    func readCompleteData(category: CategoryType) -> [SectionItem] {
         let categories = getCategoriesFromUserDefaults()
         if let matchingCategory = categories.first(where: { $0.name == category.typeValue }) {
             return matchingCategory.items

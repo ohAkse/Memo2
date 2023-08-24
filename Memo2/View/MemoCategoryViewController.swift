@@ -39,12 +39,16 @@ class MemoCategoryViewController : UIViewController
         button.setupCustomButtonFont()
         return button
     }()
+    deinit{
+        print("MemoCategoryViewController deinit called")
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
         setupSubviews()
         setupLayout()
-        
+
     }
     func setupSubviews(){
         view.addSubview(titleLabel)
@@ -57,23 +61,23 @@ class MemoCategoryViewController : UIViewController
             make.centerX.equalToSuperview() // 수평 가운데 정렬
             make.top.equalTo(view.safeAreaLayoutGuide.snp.top)
             make.width.equalTo(200)
-            make.height.equalTo(100)
+            make.height.equalTo(70)
         }
-        
+
         workoutButton.snp.makeConstraints { make in
             make.centerX.equalToSuperview() // 수평 가운데 정렬
             make.top.equalTo(titleLabel.snp.bottom).offset(10)
             make.width.equalTo(200)
             make.height.equalTo(90)
         }
-        
+
         studytButton.snp.makeConstraints { make in
             make.centerX.equalToSuperview() // 수평 가운데 정렬
             make.top.equalTo(workoutButton.snp.bottom).offset(30)
             make.width.equalTo(200)
             make.height.equalTo(90)
         }
-        
+
         meetingButton.snp.makeConstraints { make in
             make.centerX.equalToSuperview() // 수평 가운데 정렬
             make.top.equalTo(studytButton.snp.bottom).offset(30)
@@ -81,7 +85,7 @@ class MemoCategoryViewController : UIViewController
             make.height.equalTo(90)
         }
     }
-    
+
     @objc func workoutButtonTapped(){
         let MemoWriteVC = MemoWriteViewController()
         if let presentationController = MemoWriteVC.presentationController as? UISheetPresentationController {
@@ -119,3 +123,4 @@ class MemoCategoryViewController : UIViewController
         self.present(MemoWriteVC, animated: true)
     }
 }
+
