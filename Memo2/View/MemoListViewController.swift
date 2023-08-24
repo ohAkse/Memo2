@@ -7,8 +7,8 @@
 
 import UIKit
 extension MemoListViewController: UITableViewDelegate, UITableViewDataSource {
-    ///MARK : 커스텀 함수
-    private func createSectionHeaderView(title: String) -> UIView {
+    //섹션 헤더
+    func createSectionHeaderView(title: String) -> UIView {
         let headerView = UIView()
         headerView.backgroundColor = .lightGray
         let headerLabel = UILabel()
@@ -18,7 +18,8 @@ extension MemoListViewController: UITableViewDelegate, UITableViewDataSource {
         return headerView
     }
     
-    private func createSectionFooterView(text: String) -> UIView {
+    //섹션 푸터
+    func createSectionFooterView(text: String) -> UIView {
         let footerView = UIView()
         let footerLabel = UILabel()
         footerLabel.setupCustomLabelFont(text: text, isBold: false, textSize: 20)
@@ -26,7 +27,7 @@ extension MemoListViewController: UITableViewDelegate, UITableViewDataSource {
         footerView.addSubview(footerLabel)
         return footerView
     }
-    
+    //텍스트를 기준으로 카테고리와 아이템을 반환
     func findSectionItem(with text: String) -> (category: String, item: SectionItem)? {
         for category in categories {
             if let sectionItem = category.items.first(where: { $0.memoText == text }) {
@@ -35,6 +36,8 @@ extension MemoListViewController: UITableViewDelegate, UITableViewDataSource {
         }
         return nil
     }
+    
+    //스위치 온오프 여부에 따라 글자가 밑줄긋는 함수
     func configureTextView(for textView: UITextView, with text: String, isSwitchOn: Bool) {
         var attributes: [NSAttributedString.Key: Any] = [:]
         attributes[.font] = UIFont.systemFont(ofSize: cellFontSize)
@@ -46,7 +49,7 @@ extension MemoListViewController: UITableViewDelegate, UITableViewDataSource {
         textView.attributedText = NSAttributedString(string: text, attributes: attributes)
     }
     
-    ///MARK : 섹션 헤더
+    //섹션 헤더 관련 설정
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         return footerHeight
     }
@@ -55,7 +58,7 @@ extension MemoListViewController: UITableViewDelegate, UITableViewDataSource {
         let category = categories[section]
         return createSectionHeaderView(title: category.name)
     }
-    ///MARK : 섹션 푸터
+    //섹션 푸터 관련 설정
     func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
         return headerHeight
     }
@@ -65,7 +68,7 @@ extension MemoListViewController: UITableViewDelegate, UITableViewDataSource {
         let text = "완료되지 않은 항목은 총 \(category.items.filter{$0.isSwitchOn == false}.count)건 입니다."
         return createSectionFooterView(text: text)
     }
-    ///MARK : 셀
+    //테이블뷰 셀 관련 함수
     func numberOfSections(in tableView: UITableView) -> Int {
         return categories.count
     }
@@ -82,15 +85,12 @@ extension MemoListViewController: UITableViewDelegate, UITableViewDataSource {
         
         cell.textView.text = sectionItem.memoText
         cell.switchButton.isOn = sectionItem.isSwitchOn
-        
         configureTextView(for: cell.textView, with: sectionItem.memoText, isSwitchOn: cell.switchButton.isOn)
         
         cell.switchButtonAction = { [weak self] in
             guard let self = self else { return }
-           
             instance.updateData(category: category.name, cellIndex: indexPath.row, content: sectionItem.memoText, isSwitchOn: cell.switchButton.isOn)
             configureTextView(for: cell.textView, with: sectionItem.memoText, isSwitchOn: cell.switchButton.isOn)
-            updateFooterLabel(with: uncompletedItemListCount, isOn : cell.switchButton.isOn)
             updateUI()
         }
         
@@ -113,19 +113,10 @@ extension MemoListViewController: UITableViewDelegate, UITableViewDataSource {
         }
         return cell
     }
-    func updateFooterLabel(with count: Int, isOn : Bool) {
-        uncompletedItemListCount = isOn ? uncompletedItemListCount - 1 : uncompletedItemListCount + 1
-        let text = "총 \(uncompletedItemListCount)개 항목이 완료되지 않았습니다."
-        if let footerLabel = tableView.tableFooterView?.subviews.first as? UILabel {
-            footerLabel.text = text
-            footerLabel.sizeToFit()
-        }
-    }
-    
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return cellHeight
     }
-    //MARK : 스와이프시 삭제
+    //스와이프시 삭제
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         let deleteAction = UIContextualAction(style: .destructive, title: "Delete") {  [weak self] (_, _, completionHandler) in
             guard let self = self else { return }
@@ -144,9 +135,7 @@ class MemoListViewController : UIViewController{
     //컴포넌트
     lazy var tableView : UITableView = {
         let tableView = UITableView(frame: .zero, style: .grouped)
-        tableView.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
-        tableView.showsVerticalScrollIndicator = false
-        tableView.register(TodoListCell.self, forCellReuseIdentifier: "TodoListCell")
+        tableView.setupCustomTableviewUI()
         tableView.delegate = self
         tableView.dataSource = self
         return tableView
@@ -165,15 +154,18 @@ class MemoListViewController : UIViewController{
     }
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(true)
+        NotificationCenter.default.removeObserver(self)
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        InitLocalDBData()
         setupNavigationBar()
         setupSubviews()
         setupLayout()
         setupTableFHView()
+        
+        InitLocalDBData()
+        updateUI()
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(DidReceiveTextChangeCommitStatus),
@@ -187,13 +179,14 @@ class MemoListViewController : UIViewController{
             if status == .Success
             {
                 Toast.showToast(message: "요청이 성공적으로 처리되었습니다.", errorMessage: [], font: UIFont.systemFont(ofSize: 14.0), controllerView: self)
-                updateFooterLabel(with: uncompletedItemListCount, isOn: false)
                 updateUI()
             }
         }
     }
     func InitLocalDBData(){
         instance.initializeCategoriesIfNeeded()
+    }
+    func updateUI(){
         categories = instance.getCategoriesFromUserDefaults()
         uncompletedItemListCount = categories.reduce(0) { (count, category) in
             let categoryCount = category.items.reduce(0) { (itemCount, sectionItem) in
@@ -201,10 +194,11 @@ class MemoListViewController : UIViewController{
             }
             return count + categoryCount
         }
-    }
-    
-    func updateUI(){
-        categories = instance.getCategoriesFromUserDefaults()
+        let text = uncompletedItemListCount == 0 ? "All plans have been execute!" :  "총 \(uncompletedItemListCount)개 항목이 완료되지 않았습니다."
+        if let footerLabel = tableView.tableFooterView?.subviews.first as? UILabel {
+            footerLabel.text = text
+            footerLabel.sizeToFit()
+        }
         tableView.reloadData()
     }
     
@@ -224,7 +218,7 @@ class MemoListViewController : UIViewController{
         let tableViewFooter = UIView(frame: CGRect(x: 0, y: 0, width: view.bounds.width, height: footerHeight))
         tableViewFooter.backgroundColor = .gray
         let footerLabel = UILabel()
-        footerLabel.setupCustomLabelFont(text: "총 \(uncompletedItemListCount)개 항목이 완료되지 않았습니다.", isBold: true, textSize: 20)
+        footerLabel.setupCustomLabelFont(text: "총 0개 항목이 완료되지 않았습니다.", isBold: true, textSize: 20) //초기 설정, but 나중에 UI업데아트시 계속 변경됨
         footerLabel.sizeToFit()
         footerLabel.center.x = tableViewFooter.center.x
         footerLabel.center.y = tableViewFooter.frame.size.height / 2

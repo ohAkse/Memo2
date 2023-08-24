@@ -11,7 +11,6 @@ class LocalDBManager{
     static let instance = LocalDBManager()
     func createData(category: String, item: SectionItem) {
         var categories = getCategoriesFromUserDefaults()
-        print(categories)
         if let index = categories.firstIndex(where: { $0.name == category }) {
             categories[index].items.append(item)
             saveCategoriesToUserDefaults(categories)

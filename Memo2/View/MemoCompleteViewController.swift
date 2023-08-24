@@ -34,9 +34,7 @@ class MemoCompleteViewController : UIViewController{
     }()
     lazy var tableView : UITableView = {
         let tableView = UITableView(frame: .zero, style: .plain)
-        tableView.separatorInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
-        tableView.showsVerticalScrollIndicator = false
-        tableView.register(TodoListCell.self, forCellReuseIdentifier: "TodoListCell")
+        tableView.setupCustomTableviewUI()
         tableView.delegate = self
         tableView.dataSource = self
         return tableView
@@ -87,8 +85,6 @@ class MemoCompleteViewController : UIViewController{
     }
     func setupCategoryMenu(){
         var menuItems: [UIMenuElement] = []
-
-        
         menuItems.append(UIAction(title: CategoryType.workout.typeValue, image: UIImage(systemName: "figure.walk")) { [weak self] _ in
             guard let self = self else {
                 return

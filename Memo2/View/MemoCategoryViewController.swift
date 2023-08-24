@@ -46,7 +46,6 @@ class MemoCategoryViewController : UIViewController
         super.viewWillAppear(true)
         
     }
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
@@ -88,8 +87,8 @@ class MemoCategoryViewController : UIViewController
             make.height.equalTo(90)
         }
     }
-
-    @objc func workoutButtonTapped(){
+    func moveMemoWriteViewController(categoryType : CategoryType)
+    {
         let memoWriteVC = MemoWriteViewController()
         if let presentationController = memoWriteVC.presentationController as? UISheetPresentationController {
             presentationController.detents = [
@@ -97,30 +96,17 @@ class MemoCategoryViewController : UIViewController
             ]
         }
         memoWriteVC.titleLabel.text = UISheetPaperType.create.typeValue
-        memoWriteVC.category = CategoryType.workout.typeValue
+        memoWriteVC.category = categoryType.typeValue
         self.present(memoWriteVC, animated: true)
+    }
+    @objc func workoutButtonTapped(){
+        moveMemoWriteViewController(categoryType: .workout)
     }
     @objc func studytButtonTapped(){
-        let memoWriteVC = MemoWriteViewController()
-        if let presentationController = memoWriteVC.presentationController as? UISheetPresentationController {
-            presentationController.detents = [
-                .medium(),
-            ]
-        }
-        memoWriteVC.titleLabel.text = UISheetPaperType.create.typeValue
-        memoWriteVC.category = CategoryType.study.typeValue
-        self.present(memoWriteVC, animated: true)
+        moveMemoWriteViewController(categoryType: .study)
     }
     @objc func meetingButtonTapped(){
-        let memoWriteVC = MemoWriteViewController()
-        if let presentationController = memoWriteVC.presentationController as? UISheetPresentationController {
-            presentationController.detents = [
-                .medium(),
-            ]
-        }
-        memoWriteVC.titleLabel.text = UISheetPaperType.create.typeValue
-        memoWriteVC.category = CategoryType.meeting.typeValue
-        self.present(memoWriteVC, animated: true)
+        moveMemoWriteViewController(categoryType: .meeting)
     }
 }
 

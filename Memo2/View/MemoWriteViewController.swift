@@ -68,22 +68,20 @@ class MemoWriteViewController : UIViewController, UITextViewDelegate
             make.top.equalTo(titleLabel.snp.bottom)
             make.leading.equalTo(view.safeAreaLayoutGuide.snp.leading).offset(20)
             make.trailing.equalTo(view.safeAreaLayoutGuide.snp.trailing).offset(-20)
-            make.height.equalTo(270)
+            make.height.equalToSuperview().multipliedBy(0.35)
         }
         confirmButton.snp.makeConstraints { make in
-            make.top.equalTo(textContent.snp.bottom).offset(10)
+            make.top.equalTo(textContent.snp.bottom).offset(20)
             make.trailing.equalTo(view.safeAreaLayoutGuide.snp.trailing).offset(-20)
             make.height.equalTo(50)
             make.width.equalTo(100)
         }
-       
     }
     @objc func confirmButtonTapped() {
         guard let text = textContent.text, !text.isEmpty else {
             showAlert(title: "에러", message: "내용을 추가해주세요")
             return
         }
-        
         if titleLabel.text == UISheetPaperType.update.typeValue {
             instance.updateData(category: category, originText: originText, changeText: text)
             self.dismiss(animated: true)
@@ -91,7 +89,6 @@ class MemoWriteViewController : UIViewController, UITextViewDelegate
             instance.createData(category: category, item: SectionItem(memoText: text, isSwitchOn: false))
             presentingViewController?.presentingViewController?.dismiss(animated: true, completion: nil)
         }
-        
         NotificationCenter.default.post(name: .textChangeStatus, object: TextChangeCommitStatus.Success)
     }
 }
