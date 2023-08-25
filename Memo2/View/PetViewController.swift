@@ -11,13 +11,12 @@ class PetViewController : UIViewController
 {
     let instance = NetworkManager.instance
     lazy var catImageView: UIImageView = {
-        let imageView = UIImageView(image: UIImage(systemName: "pencil"))
+        let imageView = UIImageView(image: UIImage(systemName: ""))
         return imageView
     }()
     
     lazy var dogImageView: UIImageView = {
-        let imageView = UIImageView(image: UIImage(systemName: "book"))
-        imageView.backgroundColor = . blue
+        let imageView = UIImageView(image: UIImage(systemName: ""))
         return imageView
     }()
     
@@ -30,12 +29,12 @@ class PetViewController : UIViewController
         setupLayout()
     }
     override func viewDidAppear(_ animated: Bool) {
-        if #available(iOS 13.0, *) {
+        if #available(iOS 15, *) {
             Task{
                 await setupImagesAsync()
             }
         }else{
-            setupImages{}
+            setupImages()
         }
     }
     func setupImagesAsync() async {
@@ -55,21 +54,29 @@ class PetViewController : UIViewController
             print("Error: \(error.localizedDescription)")
         }
     }
-    func setupImages(completion: @escaping () -> Void) {
+    func setupImages() {
         let dogImageURL = "https://api.thedogapi.com/v1/images/search"
         let catImageURL = "https://api.thecatapi.com/v1/images/search"
         
+        let group = DispatchGroup()
+        group.enter()
         instance.fetchRandomImage(imageUrl: dogImageURL) { [weak self] dogImage in
             guard let self = self else { return }
-            self.dogImageView.image = dogImage
-            
-            instance.self.fetchRandomImage(imageUrl: catImageURL) { [weak self] catImage in
-                guard let self = self else { return }
+            DispatchQueue.main.async {
+                self.dogImageView.image = dogImage
+                group.leave()
+            }
+        }
+        group.enter()
+        instance.fetchRandomImage(imageUrl: catImageURL) { [weak self] catImage in
+            guard let self = self else { return }
+            DispatchQueue.main.async {
                 self.catImageView.image = catImage
-                completion()
+                group.leave()
             }
         }
     }
+    
     
     
     func setupSubviews(){

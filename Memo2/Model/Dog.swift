@@ -8,10 +8,10 @@
 import Foundation
 
 //URL Session 기본으로 비동기 처리 
-struct Dog : Decodable {
-     let id : String
-     let url : String
-     let width : Int
-     let height : Int
- }
+//struct Dog : Decodable {
+//     let id : String
+//     let url : String
+//     let width : Int
+//     let height : Int
+// }
 
