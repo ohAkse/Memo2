@@ -62,29 +62,29 @@ class MemoCategoryViewController : UIViewController
         titleLabel.snp.makeConstraints { make in
             make.centerX.equalToSuperview()
             make.top.equalTo(view.safeAreaLayoutGuide.snp.top)
-            make.width.equalTo(200)
-            make.height.equalTo(70)
+            make.width.equalToSuperview().multipliedBy(0.3)
+            make.height.equalToSuperview().multipliedBy(0.1)
         }
 
         workoutButton.snp.makeConstraints { make in
             make.centerX.equalToSuperview()
             make.top.equalTo(titleLabel.snp.bottom).offset(10)
             make.width.equalToSuperview().multipliedBy(0.6)
-            make.height.equalTo(90)
+            make.height.equalToSuperview().multipliedBy(0.15)
         }
 
         studytButton.snp.makeConstraints { make in
             make.centerX.equalToSuperview() 
             make.top.equalTo(workoutButton.snp.bottom).offset(30)
             make.width.equalTo(workoutButton.snp.width)
-            make.height.equalTo(90)
+            make.height.equalTo(workoutButton.snp.height)
         }
 
         meetingButton.snp.makeConstraints { make in
             make.centerX.equalToSuperview()
             make.top.equalTo(studytButton.snp.bottom).offset(30)
             make.width.equalTo(workoutButton.snp.width)
-            make.height.equalTo(90)
+            make.height.equalTo(workoutButton.snp.height)
         }
     }
     func moveMemoWriteViewController(categoryType : CategoryType)
