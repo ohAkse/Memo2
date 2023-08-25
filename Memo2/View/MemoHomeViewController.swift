@@ -10,8 +10,30 @@ import SnapKit
 
 class MemoHomeViewController : UIViewController{
     
-    lazy var mainImageView : UIImageView = {
-        let imageView = UIImageView(image: UIImage(systemName: "book"))
+    lazy var mainImageView: UIImageView = {
+        let imageView = UIImageView(image: UIImage(systemName: ""))
+        if let imageUrl = URL(string: "https://spartacodingclub.kr/css/images/scc-og.jpg") {
+            let session = URLSession(configuration: .default)
+            let task = session.dataTask(with: imageUrl) { [weak self] (data, response, error) in
+                if let error = error {
+                    print("Error: \(error.localizedDescription)")
+                    return
+                }
+                if let httpResponse = response as? HTTPURLResponse {
+                    if httpResponse.statusCode != 200 {
+                        print("HTTP Error: \(httpResponse.statusCode)")
+                        return
+                    }
+                }
+                if let imageData = data, let image = UIImage(data: imageData) {
+                    DispatchQueue.main.async { [weak self] in
+                        guard let self = self else { return }
+                        self.mainImageView.image = image
+                    }
+                }
+            }
+            task.resume()
+        }
         return imageView
     }()
     
@@ -33,11 +55,13 @@ class MemoHomeViewController : UIViewController{
         return button
     }()
     
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupSubviews()
         setupLayout()
     }
+    
     func setupSubviews(){
         view.addSubview(mainImageView)
         view.addSubview(moveToListButton)

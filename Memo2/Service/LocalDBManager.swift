@@ -7,7 +7,7 @@
 
 import Foundation
 
-class LocalDBManager{
+final class LocalDBManager{
     static let instance = LocalDBManager()
     func createData(category: String, item: SectionItem) {
         var categories = getCategoriesFromUserDefaults()
