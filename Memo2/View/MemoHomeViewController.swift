@@ -48,16 +48,26 @@ class MemoHomeViewController : UIViewController{
                 await setupLogoImageViewAsync()
             }
         }else{
-            
-            
+            setLogoImageView()
         }
     }
+    func setLogoImageView(){
+        
+        instance.getImage(imageUrl: "https://spartacodingclub.kr/css/images/scc-og.jpg"){ [weak self] image in
+            guard let self = self else { return }
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                mainImageView.image = image
+            }
+        }
+    }
+    
     func setupLogoImageViewAsync() async {
         do {
             let image =  await instance.getImageAsync(imageUrl: "https://spartacodingclub.kr/css/images/scc-og.jpg")
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
-                self.mainImageView.image = image
+                mainImageView.image = image
             }
         }
     }
