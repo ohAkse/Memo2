@@ -20,10 +20,15 @@ class LocalDBManager{
     }
 
     func getCategoriesFromUserDefaults() -> [Category] {
-        if let data = UserDefaults.standard.data(forKey: "categories"),
-            let categories = try? JSONDecoder().decode([Category].self, from: data) {
-            return categories
-        } else {
+        do {
+            if let data = UserDefaults.standard.data(forKey: "categories") {
+                let categories = try JSONDecoder().decode([Category].self, from: data)
+                return categories
+            } else {
+                return []
+            }
+        } catch {
+            print("Error decoding categories from UserDefaults: \(error)")
             return []
         }
     }

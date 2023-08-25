@@ -48,6 +48,23 @@ extension MemoListViewController: UITableViewDelegate, UITableViewDataSource {
         }
         textView.attributedText = NSAttributedString(string: text, attributes: attributes)
     }
+    //수정페이지 전환
+    func editMemo(_ text: String) {
+        guard presentedViewController == nil, let item = findSectionItem(with: text) else {
+            return
+        }
+
+        let memoWriteVC = MemoWriteViewController()
+        if let presentationController = memoWriteVC.presentationController as? UISheetPresentationController {
+            presentationController.detents = [.medium()]
+        }
+        memoWriteVC.titleLabel.text = UISheetPaperType.update.typeValue
+        memoWriteVC.category = item.category
+        memoWriteVC.selectedItem = item.item
+        memoWriteVC.textContent.text = text
+        present(memoWriteVC, animated: true)
+    }
+
     
     //섹션 헤더 관련 설정
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
@@ -96,20 +113,7 @@ extension MemoListViewController: UITableViewDelegate, UITableViewDataSource {
         
         cell.contentTextFieldAction = { [weak self] in
             guard let self = self, let text = cell.textView.text else { return }
-            
-            if self.presentedViewController != nil { return }
-            if let item = self.findSectionItem(with: text) {
-                let memoWriteVC = MemoWriteViewController()
-                if let presentationController = memoWriteVC.presentationController as? UISheetPresentationController {
-                    presentationController.detents = [.medium()]
-                }
-                memoWriteVC.titleLabel.text = UISheetPaperType.update.typeValue
-                memoWriteVC.category = item.category
-                memoWriteVC.selectedItem = item.item
-                memoWriteVC.textContent.text = text
-                self.present(memoWriteVC, animated: true)
-                
-            }
+            editMemo(text)
         }
         return cell
     }
@@ -128,7 +132,17 @@ extension MemoListViewController: UITableViewDelegate, UITableViewDataSource {
             completionHandler(true)
         }
         deleteAction.image = UIImage(systemName: "trash")
-        return UISwipeActionsConfiguration(actions: [deleteAction])
+        
+        let editAction = UIContextualAction(style: .destructive, title: "Edit") {  [weak self] (_, _, completionHandler) in
+            guard let self = self else { return }
+   
+            let category = categories[indexPath.section]
+            let sectionItem = category.items[indexPath.row]
+            editMemo(sectionItem.memoText)
+            completionHandler(true)
+        }
+        editAction.image = UIImage(systemName: "pencil")
+        return UISwipeActionsConfiguration(actions: [deleteAction,editAction])
     }
 }
 class MemoListViewController : UIViewController{
@@ -194,7 +208,7 @@ class MemoListViewController : UIViewController{
             }
             return count + categoryCount
         }
-        let text = uncompletedItemListCount == 0 ? "All plans have been execute!" :  "총 \(uncompletedItemListCount)개 항목이 완료되지 않았습니다."
+        let text = uncompletedItemListCount == 0 ? "All plans have been executed!" :  "총 \(uncompletedItemListCount)개 항목이 완료되지 않았습니다."
         if let footerLabel = tableView.tableFooterView?.subviews.first as? UILabel {
             footerLabel.text = text
             footerLabel.sizeToFit()
