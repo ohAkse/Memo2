@@ -1,2 +1,2 @@
 # Memo2
-기본기능 구현 완료(상세내용 업데이트예정)
+https://github.com/ohAkse/TodoList 이동
